@@ -15,6 +15,12 @@ namespace AuthServer.Models
         public DateTime DateOfBirth { get; set; }
         [Required]
         public DateTime RegistrationDate { get; set; }
-
+        [Required]
+        public double Weight { get; set; }
+        [Required]
+        public double Height { get; set; }
+        [Required]
+        public GenderType.GenderTypes Gender { get; set; }
+        public string IPAddress { get; set; }
     }
 }
