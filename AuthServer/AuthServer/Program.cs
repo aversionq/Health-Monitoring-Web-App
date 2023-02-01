@@ -88,6 +88,14 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
         ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 });
 
+// CORS Policy settings
+builder.Services.AddCors(options => options.AddPolicy("AuthServerPolicy", b =>
+{
+    b.AllowAnyOrigin()
+     .AllowAnyMethod()
+     .AllowAnyHeader();
+}));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -103,6 +111,9 @@ if (app.Environment.IsDevelopment())
 app.UseForwardedHeaders();
 
 // app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseCors("AuthServerPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
