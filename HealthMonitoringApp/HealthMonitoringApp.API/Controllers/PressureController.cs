@@ -14,11 +14,13 @@ namespace HealthMonitoringApp.API.Controllers
     public class PressureController : ControllerBase
     {
         private IPressureBusiness _pressureBusiness;
+        private IConfiguration _configuration;
         private string? _userToken;
 
-        public PressureController(IPressureBusiness pressureBusiness)
+        public PressureController(IPressureBusiness pressureBusiness, IConfiguration configuration)
         {
             _pressureBusiness = pressureBusiness;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -99,25 +101,33 @@ namespace HealthMonitoringApp.API.Controllers
 
         [HttpPost]
         [Route("getUserJWT")]
-        public void GetUserJWT()
+        public async Task<ActionResult> GetUserJWT()
         {
-            var req = Request;
-            var headers = req.Headers;
-            var authHeader = headers.Authorization;
-            var token = authHeader.ToString().Split(' ')[1];
+            try
+            {
+                var req = Request;
+                var headers = req.Headers;
+                var authHeader = headers.Authorization;
+                var token = authHeader.ToString().Split(' ')[1];
 
-            _userToken = token;
+                _userToken = token;
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return Unauthorized();
+            }
         }
 
         private async Task<string> GetUserId()
         {
             if (_userToken == null)
             {
-                GetUserJWT();
+                await GetUserJWT();
             }
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri("https://localhost:7009/");
+                client.BaseAddress = new Uri(_configuration["ServicesURI:AuthService"]);
                 client.DefaultRequestHeaders.Authorization = 
                     new AuthenticationHeaderValue("Bearer", _userToken);
                 var response = await client.GetAsync("api/User/getCurrentUserId");
