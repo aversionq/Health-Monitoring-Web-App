@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using HealthMonitoringApp.API.ResponseModels;
 
 namespace HealthMonitoringApp.API.Controllers
 {
@@ -35,7 +36,11 @@ namespace HealthMonitoringApp.API.Controllers
             }
             catch (Exception)
             {
-                return NotFound("User pressure not found");
+                return NotFound(new ErrorResponse
+                {
+                    ErrorDescription = "User pressure not found",
+                    ErrorCode = 700
+                });
             }
         }
 
@@ -49,7 +54,11 @@ namespace HealthMonitoringApp.API.Controllers
             }
             catch (Exception)
             {
-                return NotFound("Pressure with such id not found");
+                return NotFound(new ErrorResponse
+                {
+                    ErrorDescription = "Pressure with such id not found",
+                    ErrorCode = 710
+                });
             }
         }
 
@@ -59,13 +68,24 @@ namespace HealthMonitoringApp.API.Controllers
             try
             {
                 var userId = await GetUserId();
-                pressure.UserId = userId;
-                await _pressureBusiness.AddPressure(pressure);
+                var pressureDTO = new PressureDTO
+                {
+                    Systolic = pressure.Systolic,
+                    Diastolic = pressure.Diastolic,
+                    Pulse = pressure.Pulse,
+                    Date = pressure.Date,
+                    UserId = userId
+                };
+                await _pressureBusiness.AddPressure(pressureDTO);
                 return Ok();
             }
             catch (Exception)
             {
-                return BadRequest("Not able to add this resource");
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to add this resource",
+                    ErrorCode = 720
+                });
             }
         }
 
@@ -81,7 +101,11 @@ namespace HealthMonitoringApp.API.Controllers
             }
             catch (Exception)
             {
-                return BadRequest("Not able to update this resource");
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to update this resource",
+                    ErrorCode = 730
+                });
             }
         }
 
@@ -95,7 +119,11 @@ namespace HealthMonitoringApp.API.Controllers
             }
             catch (Exception)
             {
-                return BadRequest("Not able to update this resource");
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to update this resource",
+                    ErrorCode = 740
+                });
             }
         }
 
@@ -115,7 +143,11 @@ namespace HealthMonitoringApp.API.Controllers
             }
             catch (Exception)
             {
-                return Unauthorized();
+                return Unauthorized(new ErrorResponse
+                {
+                    ErrorDescription = "JWT token is not valid",
+                    ErrorCode = 750
+                });
             }
         }
 
