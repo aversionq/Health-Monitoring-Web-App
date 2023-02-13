@@ -1,6 +1,7 @@
 ﻿using AuthServer.Models;
 using AuthServer.Roles;
 using AuthServer.ViewModels;
+using AuthServer.ResponseModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -38,15 +39,27 @@ namespace AuthServer.Controllers
             var userExistsUsername = await _userManager.FindByNameAsync(model.Username);
             if (userExistsEmail != null && userExistsUsername != null)
             {
-                return BadRequest("These Email and Username were already taken");
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "These Email and Username were already taken",
+                    ErrorCode = 600
+                });
             }
             if (userExistsEmail != null)
             {
-                return BadRequest("This Email was already taken");
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "This Email was already taken",
+                    ErrorCode = 610
+                });
             }
             if (userExistsUsername != null)
             {
-                return BadRequest("This Username was already taken");
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "This Username was already taken",
+                    ErrorCode = 620
+                });
             }
             ApplicationUser user = new ApplicationUser
             {
@@ -66,7 +79,12 @@ namespace AuthServer.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured while creating a user");
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    new ErrorResponse
+                    {
+                        ErrorDescription = "An error occured while creating a user",
+                        ErrorCode = 630
+                    });
             }
 
             if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
@@ -87,7 +105,7 @@ namespace AuthServer.Controllers
                 await _userManager.AddToRoleAsync(user, UserRoles.DefaultUser);
             }
 
-            return Ok("User created");
+            return Ok();
         }
 
         [HttpPost]
@@ -127,9 +145,17 @@ namespace AuthServer.Controllers
                         token = new JwtSecurityTokenHandler().WriteToken(token)
                     });
                 }
-                return Unauthorized("Wrong Password");
+                return Unauthorized(new ErrorResponse
+                {
+                    ErrorDescription = "Wrong Password",
+                    ErrorCode = 640
+                });
             }
-            return Unauthorized("Wrong Email or Username");
+            return Unauthorized(new ErrorResponse
+            {
+                ErrorDescription = "Wrong Email or Username",
+                ErrorCode = 650
+            });
         }
     }
 }

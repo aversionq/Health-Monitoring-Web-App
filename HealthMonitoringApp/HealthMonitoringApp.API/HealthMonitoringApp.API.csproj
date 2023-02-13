@@ -29,4 +29,8 @@
     <ProjectReference Include="..\HealthMonitoringApp.Data\HealthMonitoringApp.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="RequestModels\" />
+  </ItemGroup>
+
 </Project>
