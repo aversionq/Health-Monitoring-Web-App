@@ -98,6 +98,13 @@ builder.Services.AddCors(options => options.AddPolicy("AuthServerPolicy", b =>
 
 var app = builder.Build();
 
+// Swagger for release mode (temporarily)
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "AuthServer V1");
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -110,7 +117,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseForwardedHeaders();
 
-// app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseCors("AuthServerPolicy");

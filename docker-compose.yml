@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+
+    mssql_db:
+        container_name: MSSQL_Db
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        restart: unless-stopped
+        volumes:
+            - .:/docker-entrypoint-initdb.d
+        env_file:
+            - ./.docker/secrets.env
+        ports:
+          - 1434:1433
+
+    auth_service:
+        container_name: AuthServer
+        build:
+          context: ./AuthServer
+          dockerfile: ./AuthServer/Dockerfile
+        ports:
+          - "8080:80"
+        depends_on:
+          - mssql_db
+          
+    pressure_service:
+        container_name: PressureService
+        build:
+          context: ./HealthMonitoringApp
+          dockerfile: ./HealthMonitoringApp.API/Dockerfile
+        ports:
+          - "5000:80"
+        depends_on:
+          - mssql_db
