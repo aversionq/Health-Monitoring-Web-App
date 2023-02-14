@@ -105,7 +105,13 @@ namespace AuthServer.Controllers
                 await _userManager.AddToRoleAsync(user, UserRoles.DefaultUser);
             }
 
-            return Ok();
+            var loginResult = await Login(new LoginViewModel
+            {
+                Username = model.Username,
+                Password = model.Password
+            }) as OkObjectResult;
+
+            return Ok(loginResult.Value);
         }
 
         [HttpPost]
