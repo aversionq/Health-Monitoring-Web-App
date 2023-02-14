@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using HealthMonitoringApp.API.ResponseModels;
 
 namespace HealthMonitoringApp.API.Controllers
 {
@@ -14,11 +15,13 @@ namespace HealthMonitoringApp.API.Controllers
     public class PressureController : ControllerBase
     {
         private IPressureBusiness _pressureBusiness;
+        private IConfiguration _configuration;
         private string? _userToken;
 
-        public PressureController(IPressureBusiness pressureBusiness)
+        public PressureController(IPressureBusiness pressureBusiness, IConfiguration configuration)
         {
             _pressureBusiness = pressureBusiness;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -33,7 +36,11 @@ namespace HealthMonitoringApp.API.Controllers
             }
             catch (Exception)
             {
-                return NotFound("User pressure not found");
+                return NotFound(new ErrorResponse
+                {
+                    ErrorDescription = "User pressure not found",
+                    ErrorCode = 700
+                });
             }
         }
 
@@ -47,7 +54,11 @@ namespace HealthMonitoringApp.API.Controllers
             }
             catch (Exception)
             {
-                return NotFound("Pressure with such id not found");
+                return NotFound(new ErrorResponse
+                {
+                    ErrorDescription = "Pressure with such id not found",
+                    ErrorCode = 710
+                });
             }
         }
 
@@ -57,13 +68,24 @@ namespace HealthMonitoringApp.API.Controllers
             try
             {
                 var userId = await GetUserId();
-                pressure.UserId = userId;
-                await _pressureBusiness.AddPressure(pressure);
+                var pressureDTO = new PressureDTO
+                {
+                    Systolic = pressure.Systolic,
+                    Diastolic = pressure.Diastolic,
+                    Pulse = pressure.Pulse,
+                    Date = pressure.Date,
+                    UserId = userId
+                };
+                await _pressureBusiness.AddPressure(pressureDTO);
                 return Ok();
             }
             catch (Exception)
             {
-                return BadRequest("Not able to add this resource");
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to add this resource",
+                    ErrorCode = 720
+                });
             }
         }
 
@@ -79,7 +101,11 @@ namespace HealthMonitoringApp.API.Controllers
             }
             catch (Exception)
             {
-                return BadRequest("Not able to update this resource");
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to update this resource",
+                    ErrorCode = 730
+                });
             }
         }
 
@@ -93,31 +119,47 @@ namespace HealthMonitoringApp.API.Controllers
             }
             catch (Exception)
             {
-                return BadRequest("Not able to update this resource");
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to update this resource",
+                    ErrorCode = 740
+                });
             }
         }
 
         [HttpPost]
         [Route("getUserJWT")]
-        public void GetUserJWT()
+        public async Task<ActionResult> GetUserJWT()
         {
-            var req = Request;
-            var headers = req.Headers;
-            var authHeader = headers.Authorization;
-            var token = authHeader.ToString().Split(' ')[1];
+            try
+            {
+                var req = Request;
+                var headers = req.Headers;
+                var authHeader = headers.Authorization;
+                var token = authHeader.ToString().Split(' ')[1];
 
-            _userToken = token;
+                _userToken = token;
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return Unauthorized(new ErrorResponse
+                {
+                    ErrorDescription = "JWT token is not valid",
+                    ErrorCode = 750
+                });
+            }
         }
 
         private async Task<string> GetUserId()
         {
             if (_userToken == null)
             {
-                GetUserJWT();
+                await GetUserJWT();
             }
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri("https://localhost:7009/");
+                client.BaseAddress = new Uri(_configuration["ServicesURI:AuthService"]);
                 client.DefaultRequestHeaders.Authorization = 
                     new AuthenticationHeaderValue("Bearer", _userToken);
                 var response = await client.GetAsync("api/User/getCurrentUserId");

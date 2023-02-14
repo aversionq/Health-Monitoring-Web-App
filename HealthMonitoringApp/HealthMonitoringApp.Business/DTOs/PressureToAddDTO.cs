@@ -12,6 +12,5 @@ namespace HealthMonitoringApp.Business.DTOs
         public int Diastolic { get; set; }
         public int Pulse { get; set; }
         public DateTime Date { get; set; }
-        public string UserId { get; set; }
     }
 }

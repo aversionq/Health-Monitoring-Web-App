@@ -16,7 +16,6 @@ namespace HealthMonitoringApp.Business.Implementations
     {
         private IPressureRepository _repository;
         private Mapper _pressureMapper;
-        private Mapper _pressureToAddMapper;
 
         public PressureBusiness(IPressureRepository repo)
         {
@@ -24,9 +23,9 @@ namespace HealthMonitoringApp.Business.Implementations
             SetupMappers();
         }
 
-        public async Task AddPressure(PressureToAddDTO pressure)
+        public async Task AddPressure(PressureDTO pressure)
         {
-            var pressureEntity = _pressureToAddMapper.Map<PressureToAddDTO, Pressure>(pressure);
+            var pressureEntity = _pressureMapper.Map<PressureDTO, Pressure>(pressure);
             await _repository.AddPressure(pressureEntity);
         }
 
@@ -84,11 +83,6 @@ namespace HealthMonitoringApp.Business.Implementations
                 cfg => cfg.CreateMap<PressureDTO, Pressure>().ReverseMap()
                 );
             _pressureMapper = new Mapper(pressureMapperConfig);
-
-            var pressureAddMapperCondfig = new MapperConfiguration(
-                cfg => cfg.CreateMap<PressureToAddDTO, Pressure>().ReverseMap()
-                );
-            _pressureToAddMapper = new Mapper(pressureAddMapperCondfig);
         }
     }
 }

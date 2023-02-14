@@ -79,11 +79,21 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Swagger for release mode (temporarily)
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "HealthMonitoringAPI V1");
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "HealthMonitoringAPI V1");
+    });
 }
 
 //app.UseHttpsRedirection();
