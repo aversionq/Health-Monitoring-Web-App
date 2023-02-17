@@ -21,6 +21,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQLConnection")));
 
+builder.Services.AddDbContext<UsersDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQLConnection")));
+
 // Password settings
 builder.Services.Configure<IdentityOptions>(options =>
 {
