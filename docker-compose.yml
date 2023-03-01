@@ -14,7 +14,7 @@ services:
           - 1434:1433
 
     auth_service:
-        container_name: AuthServer
+        container_name: AuthService
         build:
           context: ./AuthServer
           dockerfile: ./AuthServer/Dockerfile
