@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Security.Claims;
 using AuthServer.ResponseModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Controllers
 {
@@ -62,6 +63,27 @@ namespace AuthServer.Controllers
             };
 
             return userDTO;
+        }
+
+        [HttpGet]
+        [Route("getUserBMI")]
+        public async Task<ActionResult<BmiResponse>> GetUserBmi(string userId)
+        {
+            var bmiInfo = await _dbContext.AspNetUsers
+                .Where(x => x.Id == userId)
+                .Select(x => new
+                {
+                    x.Height,
+                    x.Weight
+                }).FirstOrDefaultAsync();
+            var userBmi = new BmiResponse
+            {
+                UserHeight = bmiInfo.Height,
+                UserWeight = bmiInfo.Weight
+            };
+            Console.Out.WriteLine(userBmi.Bmi);
+
+            return Ok(userBmi);
         }
 
         [HttpPatch]
