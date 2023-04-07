@@ -20,6 +20,8 @@ namespace HealthMonitoringApp.Data.DatabaseContext
         }
 
         public virtual DbSet<Pressure> Pressures { get; set; } = null!;
+        public virtual DbSet<HeartRate> HeartRates { get; set; } = null!;
+        public virtual DbSet<BloodSugar> BloodSugars { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -31,6 +33,16 @@ namespace HealthMonitoringApp.Data.DatabaseContext
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Pressure>(entity =>
+            {
+                entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            });
+
+            modelBuilder.Entity<HeartRate>(entity =>
+            {
+                entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            });
+
+            modelBuilder.Entity<BloodSugar>(entity =>
             {
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             });

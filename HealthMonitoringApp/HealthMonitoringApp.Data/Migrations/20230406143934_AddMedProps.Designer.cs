@@ -4,6 +4,7 @@ using HealthMonitoringApp.Data.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthMonitoringApp.Data.Migrations
 {
     [DbContext(typeof(HealthMonitoringDbContext))]
-    partial class HealthMonitoringDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230406143934_AddMedProps")]
+    partial class AddMedProps
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,18 +24,18 @@ namespace HealthMonitoringApp.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("HealthMonitoringApp.Core.Entities.BloodSugar", b =>
+            modelBuilder.Entity("HealthMonitoringApp.Core.Entities.BloodSugars", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("(newid())");
 
+                    b.Property<int>("BloodSugar")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("SugarValue")
-                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -44,7 +46,7 @@ namespace HealthMonitoringApp.Data.Migrations
                     b.ToTable("BloodSugars");
                 });
 
-            modelBuilder.Entity("HealthMonitoringApp.Core.Entities.HeartRate", b =>
+            modelBuilder.Entity("HealthMonitoringApp.Core.Entities.HeartRates", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
