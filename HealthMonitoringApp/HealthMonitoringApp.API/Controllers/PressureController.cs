@@ -72,7 +72,6 @@ namespace HealthMonitoringApp.API.Controllers
                 {
                     Systolic = pressure.Systolic,
                     Diastolic = pressure.Diastolic,
-                    Pulse = pressure.Pulse,
                     Date = pressure.Date,
                     UserId = userId
                 };
