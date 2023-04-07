@@ -4,6 +4,7 @@ using HealthMonitoringApp.Data.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthMonitoringApp.Data.Migrations
 {
     [DbContext(typeof(HealthMonitoringDbContext))]
-    partial class HealthMonitoringDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230406175643_UpdPropsNames")]
+    partial class UpdPropsNames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

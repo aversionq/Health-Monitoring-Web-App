@@ -1,81 +1,77 @@
-﻿using HealthMonitoringApp.Business.DTOs;
+﻿using HealthMonitoringApp.API.ResponseModels;
+using HealthMonitoringApp.Business.DTOs;
 using HealthMonitoringApp.Business.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
-using System.Security.Claims;
-using HealthMonitoringApp.API.ResponseModels;
 
 namespace HealthMonitoringApp.API.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class PressureController : ControllerBase
+    public class BloodSugarController : ControllerBase
     {
-        private IPressureBusiness _pressureBusiness;
+        private IBloodSugarBusiness _bloodSugarBusiness;
         private IConfiguration _configuration;
         private string? _userToken;
 
-        public PressureController(IPressureBusiness pressureBusiness, IConfiguration configuration)
+        public BloodSugarController(IBloodSugarBusiness bloodSugarBusiness, IConfiguration configuration)
         {
-            _pressureBusiness = pressureBusiness;
+            _bloodSugarBusiness = bloodSugarBusiness;
             _configuration = configuration;
         }
 
         [HttpGet]
-        [Route("getUserPressure")]
-        public async Task<ActionResult<List<PressureDTO>>> GetUserPressure()
+        [Route("getUserBloodSugar")]
+        public async Task<ActionResult<List<BloodSugarDTO>>> GetUserBloodSugar()
         {
             try
             {
                 var userId = await GetUserId();
-                var userPressure = await _pressureBusiness.GetUserPressure(userId);
-                return Ok(userPressure);
+                var userBloodSugar = await _bloodSugarBusiness.GetUserBloodSugar(userId);
+                return Ok(userBloodSugar);
             }
             catch (Exception)
             {
                 return NotFound(new ErrorResponse
                 {
-                    ErrorDescription = "User pressure not found",
-                    ErrorCode = 700
+                    ErrorDescription = "User blood sugar not found",
+                    ErrorCode = 900
                 });
             }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PressureDTO>> GetPressureById(Guid id)
+        public async Task<ActionResult<BloodSugarDTO>> GetBloodSugarById(Guid id)
         {
             try
             {
-                var pressure = await _pressureBusiness.GetPressureById(id);
-                return pressure;
+                var bloodSugar = await _bloodSugarBusiness.GetBloodSugarById(id);
+                return bloodSugar;
             }
             catch (Exception)
             {
                 return NotFound(new ErrorResponse
                 {
-                    ErrorDescription = "Pressure with such id not found",
-                    ErrorCode = 710
+                    ErrorDescription = "Blood sugar with such id not found",
+                    ErrorCode = 910
                 });
             }
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddPressure([FromBody] PressureToAddDTO pressure)
+        public async Task<ActionResult> AddBloodSugar([FromBody] BloodSugarToAddDTO bloodSugar)
         {
             try
             {
                 var userId = await GetUserId();
-                var pressureDTO = new PressureDTO
+                var bloodSugarDTO = new BloodSugarDTO
                 {
-                    Systolic = pressure.Systolic,
-                    Diastolic = pressure.Diastolic,
-                    Date = pressure.Date,
+                    SugarValue = bloodSugar.SugarValue,
+                    Date = bloodSugar.Date,
                     UserId = userId
                 };
-                await _pressureBusiness.AddPressure(pressureDTO);
+                await _bloodSugarBusiness.AddBloodSugar(bloodSugarDTO);
                 return Ok();
             }
             catch (Exception)
@@ -83,19 +79,19 @@ namespace HealthMonitoringApp.API.Controllers
                 return BadRequest(new ErrorResponse
                 {
                     ErrorDescription = "Not able to add this resource",
-                    ErrorCode = 720
+                    ErrorCode = 920
                 });
             }
         }
 
         [HttpPut]
-        public async Task<ActionResult> UpdatePressure([FromBody] PressureDTO pressure)
+        public async Task<ActionResult> UpdateBloodSugar([FromBody] BloodSugarDTO bloodSugar)
         {
             try
             {
                 var userId = await GetUserId();
-                pressure.UserId = userId;
-                await _pressureBusiness.UpdatePressure(pressure);
+                bloodSugar.UserId = userId;
+                await _bloodSugarBusiness.UpdateBloodSugar(bloodSugar);
                 return Ok();
             }
             catch (Exception)
@@ -103,17 +99,17 @@ namespace HealthMonitoringApp.API.Controllers
                 return BadRequest(new ErrorResponse
                 {
                     ErrorDescription = "Not able to update this resource",
-                    ErrorCode = 730
+                    ErrorCode = 930
                 });
             }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> RemovePressure(Guid id)
+        public async Task<ActionResult> RemoveBloodSugar(Guid id)
         {
             try
             {
-                await _pressureBusiness.DeletePressure(id);
+                await _bloodSugarBusiness.DeleteBloodSugar(id);
                 return Ok();
             }
             catch (Exception)
@@ -121,7 +117,7 @@ namespace HealthMonitoringApp.API.Controllers
                 return BadRequest(new ErrorResponse
                 {
                     ErrorDescription = "Not able to update this resource",
-                    ErrorCode = 740
+                    ErrorCode = 940
                 });
             }
         }
@@ -159,7 +155,7 @@ namespace HealthMonitoringApp.API.Controllers
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(_configuration["ServicesURI:AuthService"]);
-                client.DefaultRequestHeaders.Authorization = 
+                client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", _userToken);
                 var response = await client.GetAsync("api/User/getCurrentUserId");
                 return await response.Content.ReadAsStringAsync();

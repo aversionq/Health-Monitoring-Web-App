@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace HealthMonitoringApp.Business.DTOs
 {
-    public class PressureDTO
+    public class HeartRateDTO
     {
         public Guid Id { get; set; }
-        public int Systolic { get; set; }
-        public int Diastolic { get; set; }
+        public int Pulse { get; set; }
         public DateTime Date { get; set; }
-        public string UserId { get; set; }
+        public string UserId { get; set; } = null!;
     }
 }
