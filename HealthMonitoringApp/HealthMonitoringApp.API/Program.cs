@@ -20,6 +20,10 @@ builder.Services.AddDbContext<HealthMonitoringDbContext>(
     );
 builder.Services.AddScoped<IPressureBusiness, PressureBusiness>();
 builder.Services.AddScoped<IPressureRepository, PressureRepository>();
+builder.Services.AddScoped<IHeartRateBusiness, HeartRateBusiness>();
+builder.Services.AddScoped<IHeartRateRepository, HeartRateRepository>();
+builder.Services.AddScoped<IBloodSugarBusiness, BloodSugarBusiness>();
+builder.Services.AddScoped<IBloodSugarRepository, BloodSugarRepository>();
 builder.Services.AddScoped<HealthMonitoringDbContext>();
 
 // Swagger settings
