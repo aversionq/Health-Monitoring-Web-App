@@ -11,6 +11,7 @@ namespace HealthMonitoringApp.Application.Interfaces
     {
         public Task<Pressure> GetPressureById(Guid pressureId);
         public Task<IEnumerable<Pressure>> GetUserPressure(string userId);
+        public Task<Pressure> GetLatestPressure(string userId);
         public Task AddPressure(Pressure pressure);
         public Task UpdatePressure(Pressure updPressure);
         public Task DeletePressure(Pressure pressure);
