@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using HealthMonitoringApp.API.ResponseModels;
+using HealthMonitoringApp.Business.Implementations;
 
 namespace HealthMonitoringApp.API.Controllers
 {
@@ -17,6 +18,7 @@ namespace HealthMonitoringApp.API.Controllers
         private IPressureBusiness _pressureBusiness;
         private IConfiguration _configuration;
         private string? _userToken;
+        private string? _userId;
 
         public PressureController(IPressureBusiness pressureBusiness, IConfiguration configuration)
         {
@@ -58,6 +60,26 @@ namespace HealthMonitoringApp.API.Controllers
                 {
                     ErrorDescription = "Pressure with such id not found",
                     ErrorCode = 710
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("getLatestPressure")]
+        public async Task<ActionResult<PressureDTO>> GetLatestPressure()
+        {
+            try
+            {
+                var latestPressure = await _pressureBusiness
+                    .GetLatestPressure(_userId ?? await GetUserId());
+                return Ok(latestPressure);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new ErrorResponse
+                {
+                    ErrorDescription = ex.Message,
+                    ErrorCode = 750
                 });
             }
         }
@@ -162,7 +184,8 @@ namespace HealthMonitoringApp.API.Controllers
                 client.DefaultRequestHeaders.Authorization = 
                     new AuthenticationHeaderValue("Bearer", _userToken);
                 var response = await client.GetAsync("api/User/getCurrentUserId");
-                return await response.Content.ReadAsStringAsync();
+                _userId = await response.Content.ReadAsStringAsync();
+                return _userId;
             }
         }
     }

@@ -11,6 +11,7 @@ namespace HealthMonitoringApp.Business.Interfaces
     {
         public Task<BloodSugarDTO> GetBloodSugarById(Guid bloodSuagrId);
         public Task<IEnumerable<BloodSugarDTO>> GetUserBloodSugar(string userId);
+        public Task<BloodSugarDTO> GetLatestBloodSugar(string userId);
         public Task AddBloodSugar(BloodSugarDTO bloodSuagr);
         public Task UpdateBloodSugar(BloodSugarDTO bloodSuagr);
         public Task DeleteBloodSugar(Guid bloodSuagrId);

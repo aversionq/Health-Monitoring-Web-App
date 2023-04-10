@@ -1,5 +1,6 @@
 ﻿using HealthMonitoringApp.API.ResponseModels;
 using HealthMonitoringApp.Business.DTOs;
+using HealthMonitoringApp.Business.Implementations;
 using HealthMonitoringApp.Business.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,7 @@ namespace HealthMonitoringApp.API.Controllers
         private IHeartRateBusiness _heartRateBusiness;
         private IConfiguration _configuration;
         private string? _userToken;
+        private string? _userId;
 
         public HeartRateController(IHeartRateBusiness heartRateBusiness, IConfiguration configuration)
         {
@@ -55,6 +57,26 @@ namespace HealthMonitoringApp.API.Controllers
                 {
                     ErrorDescription = "Heart rate with such id not found",
                     ErrorCode = 810
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("getLatestHeartRate")]
+        public async Task<ActionResult<HeartRateDTO>> GetLatestHeartRate()
+        {
+            try
+            {
+                var latestHeartRate = await _heartRateBusiness
+                    .GetLatestHeartRate(_userId ?? await GetUserId());
+                return Ok(latestHeartRate);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new ErrorResponse
+                {
+                    ErrorDescription = ex.Message,
+                    ErrorCode = 850
                 });
             }
         }
@@ -158,7 +180,8 @@ namespace HealthMonitoringApp.API.Controllers
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", _userToken);
                 var response = await client.GetAsync("api/User/getCurrentUserId");
-                return await response.Content.ReadAsStringAsync();
+                _userId = await response.Content.ReadAsStringAsync();
+                return _userId;
             }
         }
     }
