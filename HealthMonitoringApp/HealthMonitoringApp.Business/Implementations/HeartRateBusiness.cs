@@ -55,6 +55,21 @@ namespace HealthMonitoringApp.Business.Implementations
             }
         }
 
+        public async Task<HeartRateDTO> GetLatestHeartRate(string userId)
+        {
+            try
+            {
+                var latestHeartRateEntity = await _repository.GetLatestHeartRate(userId);
+                var latestHeartRateDTO = _pulseMapper
+                    .Map<HeartRate, HeartRateDTO>(latestHeartRateEntity);
+                return latestHeartRateDTO;
+            }
+            catch (Exception)
+            {
+                throw new Exception("Latest heart rate for this user not found");
+            }
+        }
+
         public async Task<IEnumerable<HeartRateDTO>> GetUserHeartRate(string userId)
         {
             try

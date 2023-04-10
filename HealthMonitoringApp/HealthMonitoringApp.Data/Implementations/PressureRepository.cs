@@ -31,6 +31,13 @@ namespace HealthMonitoringApp.Data.Implementations
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<Pressure> GetLatestPressure(string userId)
+        {
+            var latestPressure = _dbContext.Pressures.Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.Date);
+            return await latestPressure.FirstOrDefaultAsync();
+        }
+
         public async Task<Pressure> GetPressureById(Guid pressureId)
         {
             var pressure = await _dbContext.Pressures.Where(x => x.Id == pressureId).FirstOrDefaultAsync();

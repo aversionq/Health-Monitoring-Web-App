@@ -56,6 +56,21 @@ namespace HealthMonitoringApp.Business.Implementations
             }
         }
 
+        public async Task<BloodSugarDTO> GetLatestBloodSugar(string userId)
+        {
+            try
+            {
+                var latestBloodSugarEntity = await _repository.GetLatestBloodSugar(userId);
+                var latestBloodSugarDTO = _sugarMapper
+                    .Map<BloodSugar, BloodSugarDTO>(latestBloodSugarEntity);
+                return latestBloodSugarDTO;
+            }
+            catch (Exception)
+            {
+                throw new Exception("Latest blood sugar for this user not found");
+            }
+        }
+
         public async Task<IEnumerable<BloodSugarDTO>> GetUserBloodSugar(string userId)
         {
             try

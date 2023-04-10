@@ -37,6 +37,13 @@ namespace HealthMonitoringApp.Data.Implementations
             return await heartRate.FirstOrDefaultAsync();
         }
 
+        public async Task<HeartRate> GetLatestHeartRate(string userId)
+        {
+            var latestHeartRate = _dbContext.HeartRates.Where(h => h.UserId == userId)
+                .OrderByDescending(h => h.UserId);
+            return await latestHeartRate.FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<HeartRate>> GetUserHeartRate(string userId)
         {
             var userHeartRate = _dbContext.HeartRates.Where(h => h.UserId == userId);

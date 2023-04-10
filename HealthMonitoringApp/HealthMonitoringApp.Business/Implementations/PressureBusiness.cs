@@ -42,6 +42,21 @@ namespace HealthMonitoringApp.Business.Implementations
             }
         }
 
+        public async Task<PressureDTO> GetLatestPressure(string userId)
+        {
+            try
+            {
+                var latestPressureEntity = await _repository.GetLatestPressure(userId);
+                var latestPressureDTO = _pressureMapper
+                    .Map<Pressure, PressureDTO>(latestPressureEntity);
+                return latestPressureDTO;
+            }
+            catch (Exception)
+            {
+                throw new Exception("Latest pressure for this user not found");
+            }
+        }
+
         public async Task<PressureDTO> GetPressureById(Guid pressureId)
         {
             try

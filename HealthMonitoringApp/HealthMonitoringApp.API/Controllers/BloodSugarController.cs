@@ -14,6 +14,7 @@ namespace HealthMonitoringApp.API.Controllers
         private IBloodSugarBusiness _bloodSugarBusiness;
         private IConfiguration _configuration;
         private string? _userToken;
+        private string? _userId;
 
         public BloodSugarController(IBloodSugarBusiness bloodSugarBusiness, IConfiguration configuration)
         {
@@ -55,6 +56,26 @@ namespace HealthMonitoringApp.API.Controllers
                 {
                     ErrorDescription = "Blood sugar with such id not found",
                     ErrorCode = 910
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("getLatestBloodSugar")]
+        public async Task<ActionResult<BloodSugarDTO>> GetLatestBloodSugar()
+        {
+            try
+            {
+                var latestBloodSugar = await _bloodSugarBusiness
+                    .GetLatestBloodSugar(_userId ?? await GetUserId());
+                return Ok(latestBloodSugar);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new ErrorResponse
+                {
+                    ErrorDescription = ex.Message,
+                    ErrorCode = 950
                 });
             }
         }
@@ -158,7 +179,8 @@ namespace HealthMonitoringApp.API.Controllers
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", _userToken);
                 var response = await client.GetAsync("api/User/getCurrentUserId");
-                return await response.Content.ReadAsStringAsync();
+                _userId = await response.Content.ReadAsStringAsync();
+                return _userId;
             }
         }
     }

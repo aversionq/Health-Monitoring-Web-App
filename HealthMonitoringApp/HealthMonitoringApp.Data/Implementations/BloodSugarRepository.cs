@@ -38,6 +38,13 @@ namespace HealthMonitoringApp.Data.Implementations
             return await bloodSugar.FirstOrDefaultAsync();
         }
 
+        public async Task<BloodSugar> GetLatestBloodSugar(string userId)
+        {
+            var latestBloodSugar = _dbContext.BloodSugars.Where(b => b.UserId == userId)
+                .OrderByDescending(b => b.UserId);
+            return await latestBloodSugar.FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<BloodSugar>> GetUserBloodSugar(string userId)
         {
             var userBloodSugar = _dbContext.BloodSugars.Where(b => b.UserId == userId);
