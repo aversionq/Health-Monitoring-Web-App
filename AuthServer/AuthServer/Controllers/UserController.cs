@@ -19,9 +19,9 @@ namespace AuthServer.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private UsersDbContext _dbContext;
+        private DatabaseContext.UsersDbContext _dbContext;
 
-        public UserController(UserManager<ApplicationUser> userManager, UsersDbContext context)
+        public UserController(UserManager<ApplicationUser> userManager, DatabaseContext.UsersDbContext context)
         {
             _userManager= userManager;
             _dbContext = context;
@@ -56,10 +56,10 @@ namespace AuthServer.Controllers
                 RegistrationDate = user.RegistrationDate,
                 Email = user.Email,
                 Username = user.UserName,
-                Age = (int)((DateTime.Now - user.DateOfBirth).TotalDays / 365.25),
+                Age = user.DateOfBirth is null ? null : (int)((DateTime.Now - user.DateOfBirth.Value).TotalDays / 365.25),
                 Weight = user.Weight,
                 Height = user.Height,
-                Gender = ((GenderType.GenderTypes)user.Gender).ToString()
+                Gender = user.Gender is null ? null : ((GenderType.GenderTypes)user.Gender).ToString()
             };
 
             return userDTO;

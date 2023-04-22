@@ -54,6 +54,14 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// CORS settings
+builder.Services.AddCors(options => options.AddPolicy("HealthMonitoringService", b =>
+{
+    b.AllowAnyOrigin()
+     .AllowAnyMethod()
+     .AllowAnyHeader();
+}));
+
 // JWT Settings
 builder.Services.AddAuthentication(options =>
 {
@@ -101,6 +109,8 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+
+app.UseCors("HealthMonitoringService");
 
 app.UseAuthentication();
 app.UseAuthorization();

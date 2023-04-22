@@ -7,6 +7,7 @@ using AutoMapper;
 using HealthMonitoringApp.Application.Interfaces;
 using HealthMonitoringApp.Business.DTOs;
 using HealthMonitoringApp.Business.Interfaces;
+using HealthMonitoringApp.Business.Services;
 using HealthMonitoringApp.Core.Entities;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -48,6 +49,7 @@ namespace HealthMonitoringApp.Business.Implementations
             {
                 var sugarEntity = await _repository.GetBloodSugarById(bloodSuagrId);
                 var sugarDTO = _sugarMapper.Map<BloodSugar, BloodSugarDTO>(sugarEntity);
+                DetermineBloodSugarState(sugarDTO);
                 return sugarDTO;
             }
             catch (Exception)
@@ -63,6 +65,7 @@ namespace HealthMonitoringApp.Business.Implementations
                 var latestBloodSugarEntity = await _repository.GetLatestBloodSugar(userId);
                 var latestBloodSugarDTO = _sugarMapper
                     .Map<BloodSugar, BloodSugarDTO>(latestBloodSugarEntity);
+                DetermineBloodSugarState(latestBloodSugarDTO);
                 return latestBloodSugarDTO;
             }
             catch (Exception)
@@ -78,6 +81,7 @@ namespace HealthMonitoringApp.Business.Implementations
                 var userSugarEntity = await _repository.GetUserBloodSugar(userId);
                 var userSugarDTO = _sugarMapper.Map<IEnumerable<BloodSugar>,
                     IEnumerable<BloodSugarDTO>>(userSugarEntity);
+                userSugarDTO.ToList().ForEach(x => DetermineBloodSugarState(x));
                 return userSugarDTO;
             }
             catch (Exception)
@@ -90,6 +94,11 @@ namespace HealthMonitoringApp.Business.Implementations
         {
             var sugarEntity = _sugarMapper.Map<BloodSugarDTO, BloodSugar>(bloodSuagr);
             await _repository.UpdateBloodSugar(sugarEntity);
+        }
+
+        private void DetermineBloodSugarState(BloodSugarDTO sugar)
+        {
+            sugar.MedicalState = MedicalStateHandler.GetUserBloodSugarState(sugar.SugarValue).ToString();
         }
 
         private void SetupMappers()

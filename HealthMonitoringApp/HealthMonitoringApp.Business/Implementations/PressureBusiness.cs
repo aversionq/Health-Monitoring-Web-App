@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using HealthMonitoringApp.Core.Entities;
+using HealthMonitoringApp.Business.Services;
 
 namespace HealthMonitoringApp.Business.Implementations
 {
@@ -49,6 +50,7 @@ namespace HealthMonitoringApp.Business.Implementations
                 var latestPressureEntity = await _repository.GetLatestPressure(userId);
                 var latestPressureDTO = _pressureMapper
                     .Map<Pressure, PressureDTO>(latestPressureEntity);
+                DeterminePressureState(latestPressureDTO);
                 return latestPressureDTO;
             }
             catch (Exception)
@@ -63,6 +65,7 @@ namespace HealthMonitoringApp.Business.Implementations
             {
                 var pressureEntity = await _repository.GetPressureById(pressureId);
                 var pressureDTO = _pressureMapper.Map<Pressure, PressureDTO>(pressureEntity);
+                DeterminePressureState(pressureDTO);
                 return pressureDTO;
             }
             catch (Exception)
@@ -78,6 +81,7 @@ namespace HealthMonitoringApp.Business.Implementations
                 var userPressureEntity = await _repository.GetUserPressure(userId);
                 var userPressureDTO = _pressureMapper.Map<IEnumerable<Pressure>, 
                     IEnumerable<PressureDTO>>(userPressureEntity);
+                userPressureDTO.ToList().ForEach(x => DeterminePressureState(x));
                 return userPressureDTO;
             }
             catch (Exception)
@@ -90,6 +94,13 @@ namespace HealthMonitoringApp.Business.Implementations
         {
             var pressureEntity = _pressureMapper.Map<PressureDTO, Pressure>(pressure);
             await _repository.UpdatePressure(pressureEntity);
+        }
+
+        private void DeterminePressureState(PressureDTO pressure)
+        {
+            pressure.MedicalState = MedicalStateHandler
+                .GetUserPressureState(pressure.Systolic, pressure.Diastolic)
+                .ToString();
         }
 
         private void SetupMappers()

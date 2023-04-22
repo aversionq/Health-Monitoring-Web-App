@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Models
 {
-    [Index("NormalizedEmail", Name = "EmailIndex")]
     public partial class AspNetUser
     {
         public AspNetUser()
@@ -17,21 +13,14 @@ namespace AuthServer.Models
             Roles = new HashSet<AspNetRole>();
         }
 
-        [Key]
         public string Id { get; set; } = null!;
-        [StringLength(70)]
-        public string FirstName { get; set; } = null!;
-        [StringLength(70)]
-        public string LastName { get; set; } = null!;
-        public DateTime DateOfBirth { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public DateTime RegistrationDate { get; set; }
-        [StringLength(256)]
         public string? UserName { get; set; }
-        [StringLength(256)]
         public string? NormalizedUserName { get; set; }
-        [StringLength(256)]
         public string? Email { get; set; }
-        [StringLength(256)]
         public string? NormalizedEmail { get; set; }
         public bool EmailConfirmed { get; set; }
         public string? PasswordHash { get; set; }
@@ -43,21 +32,15 @@ namespace AuthServer.Models
         public DateTimeOffset? LockoutEnd { get; set; }
         public bool LockoutEnabled { get; set; }
         public int AccessFailedCount { get; set; }
-        public int Gender { get; set; }
-        public double Height { get; set; }
-        public double Weight { get; set; }
-        [Column("IPAddress")]
+        public int? Gender { get; set; }
+        public double? Height { get; set; }
+        public double? Weight { get; set; }
         public string Ipaddress { get; set; } = null!;
 
-        [InverseProperty("User")]
         public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; }
-        [InverseProperty("User")]
         public virtual ICollection<AspNetUserLogin> AspNetUserLogins { get; set; }
-        [InverseProperty("User")]
         public virtual ICollection<AspNetUserToken> AspNetUserTokens { get; set; }
 
-        [ForeignKey("UserId")]
-        [InverseProperty("Users")]
         public virtual ICollection<AspNetRole> Roles { get; set; }
     }
 }

@@ -65,14 +65,14 @@ namespace AuthServer.Controllers
             {
                 Email = model.Email,
                 UserName = model.Username,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
+                //FirstName = model.FirstName,
+                //LastName = model.LastName,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                DateOfBirth = model.DateOfBirth.Date,
+                //DateOfBirth = model.DateOfBirth.Date,
                 RegistrationDate = DateTime.Now,
-                Weight = model.Weight,
-                Height = model.Height,
-                Gender = model.Gender,
+                //Weight = model.Weight,
+                //Height = model.Height,
+                //Gender = model.Gender,
                 IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
             };
 

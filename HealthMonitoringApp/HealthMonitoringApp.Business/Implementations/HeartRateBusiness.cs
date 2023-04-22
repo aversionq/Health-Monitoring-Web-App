@@ -7,6 +7,7 @@ using AutoMapper;
 using HealthMonitoringApp.Application.Interfaces;
 using HealthMonitoringApp.Business.DTOs;
 using HealthMonitoringApp.Business.Interfaces;
+using HealthMonitoringApp.Business.Services;
 using HealthMonitoringApp.Core.Entities;
 
 namespace HealthMonitoringApp.Business.Implementations
@@ -47,6 +48,7 @@ namespace HealthMonitoringApp.Business.Implementations
             {
                 var pulseEntity = await _repository.GetHeartRateById(heartRateId);
                 var pulseDTO = _pulseMapper.Map<HeartRate, HeartRateDTO>(pulseEntity);
+                DetermineHeartRateState(pulseDTO);
                 return pulseDTO;
             }
             catch (Exception)
@@ -62,6 +64,7 @@ namespace HealthMonitoringApp.Business.Implementations
                 var latestHeartRateEntity = await _repository.GetLatestHeartRate(userId);
                 var latestHeartRateDTO = _pulseMapper
                     .Map<HeartRate, HeartRateDTO>(latestHeartRateEntity);
+                DetermineHeartRateState(latestHeartRateDTO);
                 return latestHeartRateDTO;
             }
             catch (Exception)
@@ -77,6 +80,7 @@ namespace HealthMonitoringApp.Business.Implementations
                 var userPulseEntity = await _repository.GetUserHeartRate(userId);
                 var userPulseDTO = _pulseMapper.Map<IEnumerable<HeartRate>,
                     IEnumerable<HeartRateDTO>>(userPulseEntity);
+                userPulseDTO.ToList().ForEach(x => DetermineHeartRateState(x));
                 return userPulseDTO;
             }
             catch (Exception)
@@ -89,6 +93,11 @@ namespace HealthMonitoringApp.Business.Implementations
         {
             var pulseEntity = _pulseMapper.Map<HeartRateDTO, HeartRate>(heartRate);
             await _repository.UpdateHeartRate(pulseEntity);
+        }
+
+        private void DetermineHeartRateState(HeartRateDTO heartRate)
+        {
+            heartRate.MedicalState = MedicalStateHandler.GetUserHeartRateState(heartRate.Pulse).ToString();
         }
 
         private void SetupMappers()
