@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using AuthServer.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using AuthServer.Models;
 
 namespace AuthServer.DatabaseContext
 {
@@ -28,6 +28,7 @@ namespace AuthServer.DatabaseContext
         {
             if (!optionsBuilder.IsConfigured)
             {
+
             }
         }
 
@@ -38,15 +39,50 @@ namespace AuthServer.DatabaseContext
                 entity.HasIndex(e => e.NormalizedName, "RoleNameIndex")
                     .IsUnique()
                     .HasFilter("([NormalizedName] IS NOT NULL)");
+
+                entity.Property(e => e.Name).HasMaxLength(256);
+
+                entity.Property(e => e.NormalizedName).HasMaxLength(256);
+            });
+
+            modelBuilder.Entity<AspNetRoleClaim>(entity =>
+            {
+                entity.HasIndex(e => e.RoleId, "IX_AspNetRoleClaims_RoleId");
+
+                entity.HasOne(d => d.Role)
+                    .WithMany(p => p.AspNetRoleClaims)
+                    .HasForeignKey(d => d.RoleId);
             });
 
             modelBuilder.Entity<AspNetUser>(entity =>
             {
+                entity.HasIndex(e => e.NormalizedEmail, "EmailIndex");
+
                 entity.HasIndex(e => e.NormalizedUserName, "UserNameIndex")
                     .IsUnique()
                     .HasFilter("([NormalizedUserName] IS NOT NULL)");
 
-                entity.Property(e => e.Ipaddress).HasDefaultValueSql("(N'')");
+                entity.Property(e => e.Email).HasMaxLength(256);
+
+                entity.Property(e => e.FirstName).HasMaxLength(70);
+
+                entity.Property(e => e.Gender).HasDefaultValueSql("((0))");
+
+                entity.Property(e => e.Height).HasDefaultValueSql("((0.0000000000000000e+000))");
+
+                entity.Property(e => e.Ipaddress)
+                    .HasColumnName("IPAddress")
+                    .HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.LastName).HasMaxLength(70);
+
+                entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
+
+                entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
+
+                entity.Property(e => e.UserName).HasMaxLength(256);
+
+                entity.Property(e => e.Weight).HasDefaultValueSql("((0.0000000000000000e+000))");
 
                 entity.HasMany(d => d.Roles)
                     .WithMany(p => p.Users)
@@ -64,14 +100,33 @@ namespace AuthServer.DatabaseContext
                         });
             });
 
+            modelBuilder.Entity<AspNetUserClaim>(entity =>
+            {
+                entity.HasIndex(e => e.UserId, "IX_AspNetUserClaims_UserId");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.AspNetUserClaims)
+                    .HasForeignKey(d => d.UserId);
+            });
+
             modelBuilder.Entity<AspNetUserLogin>(entity =>
             {
                 entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
+
+                entity.HasIndex(e => e.UserId, "IX_AspNetUserLogins_UserId");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.AspNetUserLogins)
+                    .HasForeignKey(d => d.UserId);
             });
 
             modelBuilder.Entity<AspNetUserToken>(entity =>
             {
                 entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name });
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.AspNetUserTokens)
+                    .HasForeignKey(d => d.UserId);
             });
 
             OnModelCreatingPartial(modelBuilder);
