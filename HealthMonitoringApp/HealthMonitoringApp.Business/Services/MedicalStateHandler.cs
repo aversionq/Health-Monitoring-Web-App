@@ -49,9 +49,9 @@ namespace HealthMonitoringApp.Business.Services
             {
                 case ( < 90, < 60):
                     return MedicalState.MedicalStateType.Low;
-                case ( >= 90 and < 120, >= 60 and < 80):
+                case ( >= 90 and < 125, >= 60 and < 80):
                     return MedicalState.MedicalStateType.Normal;
-                case ( >= 120 and < 130, >= 80 and <90):
+                case ( >= 125 and < 130, >= 70 and <90):
                     return MedicalState.MedicalStateType.Elevated;
                 case ( >= 130, >= 90):
                     return MedicalState.MedicalStateType.High;
