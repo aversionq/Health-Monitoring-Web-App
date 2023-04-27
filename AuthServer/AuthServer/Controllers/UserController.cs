@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Security.Claims;
 using AuthServer.ResponseModels;
 using Microsoft.EntityFrameworkCore;
+using AuthServer.Roles;
+using AutoMapper;
 
 namespace AuthServer.Controllers
 {
@@ -20,11 +22,13 @@ namespace AuthServer.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private DatabaseContext.UsersDbContext _dbContext;
+        private Mapper _userMapper;
 
         public UserController(UserManager<ApplicationUser> userManager, DatabaseContext.UsersDbContext context)
         {
             _userManager= userManager;
             _dbContext = context;
+            SetupMapper();
         }
 
         [HttpGet]
@@ -47,11 +51,26 @@ namespace AuthServer.Controllers
         public async Task<ApplicationUserDTO> GetUserById(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
+            var roles = await _userManager.GetRolesAsync(user);
+            string userRole;
+            if (roles.Contains(UserRoles.Admin))
+            {
+                userRole = UserRoles.Admin;
+            }
+            else if (roles.Contains(UserRoles.Doctor))
+            {
+                userRole = UserRoles.Doctor;
+            }
+            else
+            {
+                userRole = UserRoles.DefaultUser;
+            }
             ApplicationUserDTO userDTO = new ApplicationUserDTO
             {
                 Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
+                Role = userRole,
                 DateOfBirth = user.DateOfBirth,
                 RegistrationDate = user.RegistrationDate,
                 Email = user.Email,
@@ -61,7 +80,7 @@ namespace AuthServer.Controllers
                 Height = user.Height,
                 Gender = user.Gender is null ? null : ((GenderType.GenderTypes)user.Gender).ToString()
             };
-
+            //var userDTO = _userMapper.Map<ApplicationUser, ApplicationUserDTO>(user);
             return userDTO;
         }
 
@@ -167,6 +186,15 @@ namespace AuthServer.Controllers
             await _dbContext.SaveChangesAsync();
 
             return Ok();
+        }
+
+        private void SetupMapper()
+        {
+            var userMapperConfig = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ApplicationUser, ApplicationUserDTO>().ReverseMap();
+            });
+            _userMapper = new Mapper(userMapperConfig);
         }
     }
 }
