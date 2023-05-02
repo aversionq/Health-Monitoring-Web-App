@@ -1,5 +1,6 @@
 using AuthServer.DatabaseContext;
 using AuthServer.Models;
+using AuthServer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -34,6 +35,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddSingleton<PictureUploadService>();
 
 // JWT settings
 builder.Services.AddAuthentication(options =>
