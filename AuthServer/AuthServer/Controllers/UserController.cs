@@ -12,6 +12,9 @@ using AuthServer.ResponseModels;
 using Microsoft.EntityFrameworkCore;
 using AuthServer.Roles;
 using AutoMapper;
+using Newtonsoft.Json;
+using System.Runtime.CompilerServices;
+using AuthServer.Services;
 
 namespace AuthServer.Controllers
 {
@@ -21,13 +24,16 @@ namespace AuthServer.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private DatabaseContext.UsersDbContext _dbContext;
+        private UsersDbContext _dbContext;
         private Mapper _userMapper;
+        private PictureUploadService _pictureUploadService;
 
-        public UserController(UserManager<ApplicationUser> userManager, DatabaseContext.UsersDbContext context)
+        public UserController(UserManager<ApplicationUser> userManager, 
+            UsersDbContext context, PictureUploadService pictureUpload)
         {
             _userManager= userManager;
             _dbContext = context;
+            _pictureUploadService = pictureUpload;
             SetupMapper();
         }
 
@@ -104,7 +110,7 @@ namespace AuthServer.Controllers
 
             return Ok(userBmi);
         }
-
+ 
         [HttpPatch]
         [Route("changeWeight")]
         public async Task<ActionResult> EditUserWeight([FromBody] MetricsChange metrics)

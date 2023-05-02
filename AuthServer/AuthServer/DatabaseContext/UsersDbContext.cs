@@ -23,12 +23,12 @@ namespace AuthServer.DatabaseContext
         public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; } = null!;
         public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; } = null!;
         public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; } = null!;
+        public virtual DbSet<DoctorRequest> DoctorRequests { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-
             }
         }
 
@@ -127,6 +127,22 @@ namespace AuthServer.DatabaseContext
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.AspNetUserTokens)
                     .HasForeignKey(d => d.UserId);
+            });
+
+            modelBuilder.Entity<DoctorRequest>(entity =>
+            {
+                entity.HasKey(e => e.UserId)
+                    .HasName("DoctorRequests_PK");
+
+                entity.Property(e => e.DiplomaPicture).HasMaxLength(450);
+
+                entity.Property(e => e.PassportPicture).HasMaxLength(450);
+
+                entity.HasOne(d => d.User)
+                    .WithOne(p => p.DoctorRequest)
+                    .HasForeignKey<DoctorRequest>(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_UserDoctor");
             });
 
             OnModelCreatingPartial(modelBuilder);
