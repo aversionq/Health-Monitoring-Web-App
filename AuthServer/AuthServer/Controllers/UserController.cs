@@ -10,6 +10,11 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Security.Claims;
 using AuthServer.ResponseModels;
 using Microsoft.EntityFrameworkCore;
+using AuthServer.Roles;
+using AutoMapper;
+using Newtonsoft.Json;
+using System.Runtime.CompilerServices;
+using AuthServer.Services;
 
 namespace AuthServer.Controllers
 {
@@ -19,12 +24,47 @@ namespace AuthServer.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private DatabaseContext.UsersDbContext _dbContext;
+        private UsersDbContext _dbContext;
+        private Mapper _userMapper;
+        private PictureUploadService _pictureUploadService;
 
-        public UserController(UserManager<ApplicationUser> userManager, DatabaseContext.UsersDbContext context)
+        public UserController(UserManager<ApplicationUser> userManager, 
+            UsersDbContext context, PictureUploadService pictureUpload)
         {
             _userManager= userManager;
             _dbContext = context;
+            _pictureUploadService = pictureUpload;
+            SetupMapper();
+        }
+
+        [HttpPost]
+        [Route("becomeDoctorsPatient")]
+        public async Task<ActionResult> LetDoctorAccessMedicalData(string doctorId)
+        {
+            var doctors = await _userManager.GetUsersInRoleAsync(UserRoles.Doctor);
+            var doctorIds = doctors.Select(x => x.Id).ToList();
+            if (doctorIds.Contains(doctorId))
+            {
+                _dbContext.DoctorPatients.Add(new DoctorPatient
+                {
+                    DoctorId = doctorId,
+                    UserId = await GetCurrentUserId()
+                });
+                await _dbContext.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    Message = "You successfully gave access to your medical data to the doctor"
+                });
+            }
+            else
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "User you are trying to give data access is not a doctor",
+                    ErrorCode = 3000
+                });
+            }
         }
 
         [HttpGet]
@@ -47,11 +87,26 @@ namespace AuthServer.Controllers
         public async Task<ApplicationUserDTO> GetUserById(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
+            var roles = await _userManager.GetRolesAsync(user);
+            string userRole;
+            if (roles.Contains(UserRoles.Admin))
+            {
+                userRole = UserRoles.Admin;
+            }
+            else if (roles.Contains(UserRoles.Doctor))
+            {
+                userRole = UserRoles.Doctor;
+            }
+            else
+            {
+                userRole = UserRoles.DefaultUser;
+            }
             ApplicationUserDTO userDTO = new ApplicationUserDTO
             {
                 Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
+                Role = userRole,
                 DateOfBirth = user.DateOfBirth,
                 RegistrationDate = user.RegistrationDate,
                 Email = user.Email,
@@ -61,7 +116,7 @@ namespace AuthServer.Controllers
                 Height = user.Height,
                 Gender = user.Gender is null ? null : ((GenderType.GenderTypes)user.Gender).ToString()
             };
-
+            //var userDTO = _userMapper.Map<ApplicationUser, ApplicationUserDTO>(user);
             return userDTO;
         }
 
@@ -85,7 +140,7 @@ namespace AuthServer.Controllers
 
             return Ok(userBmi);
         }
-
+ 
         [HttpPatch]
         [Route("changeWeight")]
         public async Task<ActionResult> EditUserWeight([FromBody] MetricsChange metrics)
@@ -167,6 +222,15 @@ namespace AuthServer.Controllers
             await _dbContext.SaveChangesAsync();
 
             return Ok();
+        }
+
+        private void SetupMapper()
+        {
+            var userMapperConfig = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ApplicationUser, ApplicationUserDTO>().ReverseMap();
+            });
+            _userMapper = new Mapper(userMapperConfig);
         }
     }
 }
