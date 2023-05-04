@@ -23,6 +23,7 @@ namespace AuthServer.DatabaseContext
         public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; } = null!;
         public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; } = null!;
         public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; } = null!;
+        public virtual DbSet<DoctorPatient> DoctorPatients { get; set; } = null!;
         public virtual DbSet<DoctorRequest> DoctorRequests { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -127,6 +128,27 @@ namespace AuthServer.DatabaseContext
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.AspNetUserTokens)
                     .HasForeignKey(d => d.UserId);
+            });
+
+            modelBuilder.Entity<DoctorPatient>(entity =>
+            {
+                entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.DoctorId).HasMaxLength(450);
+
+                entity.Property(e => e.UserId).HasMaxLength(450);
+
+                entity.HasOne(d => d.Doctor)
+                    .WithMany(p => p.DoctorPatientDoctors)
+                    .HasForeignKey(d => d.DoctorId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_DoctorUser");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.DoctorPatientUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_PatientUser");
             });
 
             modelBuilder.Entity<DoctorRequest>(entity =>

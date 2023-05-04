@@ -10,6 +10,8 @@ namespace AuthServer.Models
             AspNetUserClaims = new HashSet<AspNetUserClaim>();
             AspNetUserLogins = new HashSet<AspNetUserLogin>();
             AspNetUserTokens = new HashSet<AspNetUserToken>();
+            DoctorPatientDoctors = new HashSet<DoctorPatient>();
+            DoctorPatientUsers = new HashSet<DoctorPatient>();
             Roles = new HashSet<AspNetRole>();
         }
 
@@ -41,6 +43,8 @@ namespace AuthServer.Models
         public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; }
         public virtual ICollection<AspNetUserLogin> AspNetUserLogins { get; set; }
         public virtual ICollection<AspNetUserToken> AspNetUserTokens { get; set; }
+        public virtual ICollection<DoctorPatient> DoctorPatientDoctors { get; set; }
+        public virtual ICollection<DoctorPatient> DoctorPatientUsers { get; set; }
 
         public virtual ICollection<AspNetRole> Roles { get; set; }
     }

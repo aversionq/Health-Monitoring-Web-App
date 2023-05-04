@@ -1,9 +1,13 @@
-﻿using HealthMonitoringApp.API.ResponseModels;
+﻿using HealthMonitoringApp.API.RequestModels;
+using HealthMonitoringApp.API.ResponseModels;
 using HealthMonitoringApp.Business.DTOs;
 using HealthMonitoringApp.Business.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 
 namespace HealthMonitoringApp.API.Controllers
 {
@@ -23,6 +27,64 @@ namespace HealthMonitoringApp.API.Controllers
         }
 
         [HttpGet]
+        [Route("getPatientBloodSugar")]
+        public async Task<ActionResult<List<BloodSugarDTO>>> GetPatientBloodSugar(string patientId)
+        {
+            try
+            {
+                var doctorId = await GetUserId();
+                bool doctorCheck;
+                using (var client = new HttpClient())
+                {
+                    var checkUri = _configuration["ServicesURI:AuthService"]
+                        + "/api/Doctor/checkDoctorRequest";
+
+                    var doctorReq = new DoctorCheckRequest
+                    {
+                        DoctorId = doctorId,
+                        PatientId = patientId
+                    };
+
+                    var json = JsonSerializer.Serialize(doctorReq);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    await GetUserJWT();
+
+                    client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", _userToken);
+
+                    var response = await client
+                        .PostAsync(checkUri, data)
+                        .Result.Content.ReadAsStringAsync();
+
+                    doctorCheck = response == "true";
+                }
+
+                if (doctorCheck)
+                {
+                    var patientBloodSugar = await _bloodSugarBusiness.GetUserBloodSugar(patientId);
+                    return Ok(patientBloodSugar);
+                }
+                else
+                {
+                    return BadRequest(new ErrorResponse
+                    {
+                        ErrorDescription = "You are not allowed to get this user's medical data",
+                        ErrorCode = 5000
+                    });
+                }
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Something went wrong",
+                    ErrorCode = 10000
+                });
+            }
+        }
+
+        [HttpGet]
         [Route("getUserBloodSugar")]
         public async Task<ActionResult<List<BloodSugarDTO>>> GetUserBloodSugar()
         {
@@ -30,6 +92,10 @@ namespace HealthMonitoringApp.API.Controllers
             {
                 var userId = await GetUserId();
                 var userBloodSugar = await _bloodSugarBusiness.GetUserBloodSugar(userId);
+                // TODO: Refactor receiving userId!!!
+
+                //var test = this.User;
+                //var iddd = test.FindFirstValue(ClaimTypes.NameIdentifier);
                 return Ok(userBloodSugar);
             }
             catch (Exception)

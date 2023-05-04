@@ -37,6 +37,36 @@ namespace AuthServer.Controllers
             SetupMapper();
         }
 
+        [HttpPost]
+        [Route("becomeDoctorsPatient")]
+        public async Task<ActionResult> LetDoctorAccessMedicalData(string doctorId)
+        {
+            var doctors = await _userManager.GetUsersInRoleAsync(UserRoles.Doctor);
+            var doctorIds = doctors.Select(x => x.Id).ToList();
+            if (doctorIds.Contains(doctorId))
+            {
+                _dbContext.DoctorPatients.Add(new DoctorPatient
+                {
+                    DoctorId = doctorId,
+                    UserId = await GetCurrentUserId()
+                });
+                await _dbContext.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    Message = "You successfully gave access to your medical data to the doctor"
+                });
+            }
+            else
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "User you are trying to give data access is not a doctor",
+                    ErrorCode = 3000
+                });
+            }
+        }
+
         [HttpGet]
         [Route("getCurrentUserId")]
         public async Task<string> GetCurrentUserId()

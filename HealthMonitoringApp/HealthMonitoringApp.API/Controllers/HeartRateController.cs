@@ -1,10 +1,13 @@
-﻿using HealthMonitoringApp.API.ResponseModels;
+﻿using HealthMonitoringApp.API.RequestModels;
+using HealthMonitoringApp.API.ResponseModels;
 using HealthMonitoringApp.Business.DTOs;
 using HealthMonitoringApp.Business.Implementations;
 using HealthMonitoringApp.Business.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text;
 
 namespace HealthMonitoringApp.API.Controllers
 {
@@ -21,6 +24,64 @@ namespace HealthMonitoringApp.API.Controllers
         {
             _heartRateBusiness = heartRateBusiness;
             _configuration = configuration;
+        }
+
+        [HttpGet]
+        [Route("getPatientHeartRate")]
+        public async Task<ActionResult<List<HeartRateDTO>>> GetPatientHeartRate(string patientId)
+        {
+            try
+            {
+                var doctorId = await GetUserId();
+                bool doctorCheck;
+                using (var client = new HttpClient())
+                {
+                    var checkUri = _configuration["ServicesURI:AuthService"]
+                        + "/api/Doctor/checkDoctorRequest";
+
+                    var doctorReq = new DoctorCheckRequest
+                    {
+                        DoctorId = doctorId,
+                        PatientId = patientId
+                    };
+
+                    var json = JsonSerializer.Serialize(doctorReq);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    await GetUserJWT();
+
+                    client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", _userToken);
+
+                    var response = await client
+                        .PostAsync(checkUri, data)
+                        .Result.Content.ReadAsStringAsync();
+
+                    doctorCheck = response == "true";
+                }
+
+                if (doctorCheck)
+                {
+                    var patientHeartRate = await _heartRateBusiness.GetUserHeartRate(patientId);
+                    return Ok(patientHeartRate);
+                }
+                else
+                {
+                    return BadRequest(new ErrorResponse
+                    {
+                        ErrorDescription = "You are not allowed to get this user's medical data",
+                        ErrorCode = 5000
+                    });
+                }
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Something went wrong",
+                    ErrorCode = 10000
+                });
+            }
         }
 
         [HttpGet]

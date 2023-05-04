@@ -150,6 +150,27 @@ namespace AuthServer.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("checkDoctorRequest")]
+        public async Task<ActionResult<bool>> CheckDoctorRequest([FromBody] DoctorCheckRequest dcr)
+        {
+            try
+            {
+                var doctorCheck = await _dbContext.DoctorPatients
+                    .Where(x => x.DoctorId == dcr.DoctorId && x.UserId == dcr.PatientId)
+                    .FirstOrDefaultAsync();
+                return Ok(doctorCheck is not null);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = ex.Message,
+                    ErrorCode = 3500
+                });
+            }
+        }
+
         private async Task<string> GetCurrentUserId()
         {
             ClaimsPrincipal currentUser = this.User;
