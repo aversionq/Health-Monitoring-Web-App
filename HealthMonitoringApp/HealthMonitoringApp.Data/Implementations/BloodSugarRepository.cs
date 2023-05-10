@@ -41,7 +41,7 @@ namespace HealthMonitoringApp.Data.Implementations
         public async Task<BloodSugar> GetLatestBloodSugar(string userId)
         {
             var latestBloodSugar = _dbContext.BloodSugars.Where(b => b.UserId == userId)
-                .OrderByDescending(b => b.UserId);
+                .OrderByDescending(b => b.Date);
             return await latestBloodSugar.FirstOrDefaultAsync();
         }
 
