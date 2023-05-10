@@ -40,7 +40,7 @@ namespace HealthMonitoringApp.Data.Implementations
         public async Task<HeartRate> GetLatestHeartRate(string userId)
         {
             var latestHeartRate = _dbContext.HeartRates.Where(h => h.UserId == userId)
-                .OrderByDescending(h => h.UserId);
+                .OrderByDescending(h => h.Date);
             return await latestHeartRate.FirstOrDefaultAsync();
         }
 
