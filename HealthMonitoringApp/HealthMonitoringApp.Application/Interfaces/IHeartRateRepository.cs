@@ -11,6 +11,8 @@ namespace HealthMonitoringApp.Application.Interfaces
     {
         public Task<HeartRate> GetHeartRateById(Guid heartRateId);
         public Task<IEnumerable<HeartRate>> GetUserHeartRate(string userId);
+        public Task<IEnumerable<HeartRate>> GetSortedPagedUserHeartRate(string userId, int page, string sortType);
+        public Task<IEnumerable<HeartRate>> GetUserHeartRateByDateInterval(string userId, DateTime startDate, DateTime endDate);
         public Task<HeartRate> GetLatestHeartRate(string userId);
         public Task AddHeartRate(HeartRate heartRate);
         public Task UpdateHeartRate(HeartRate updHeartRate);

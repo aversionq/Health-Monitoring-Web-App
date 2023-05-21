@@ -74,6 +74,22 @@ namespace HealthMonitoringApp.Business.Implementations
             }
         }
 
+        public async Task<IEnumerable<BloodSugarDTO>> GetSortedPagedUserBloodSugar(string userId, int page, string sortType)
+        {
+            try
+            {
+                var sugar = await _repository.GetSortedPagedUserBloodSugar(userId, page, sortType);
+                var sugarDTO = _sugarMapper
+                    .Map<IEnumerable<BloodSugar>, IEnumerable<BloodSugarDTO>>(sugar);
+                sugarDTO.ToList().ForEach(x => DetermineBloodSugarState(x));
+                return sugarDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<BloodSugarDTO>> GetUserBloodSugar(string userId)
         {
             try
@@ -87,6 +103,22 @@ namespace HealthMonitoringApp.Business.Implementations
             catch (Exception)
             {
                 throw new Exception("Blood sugar with such id not found");
+            }
+        }
+
+        public async Task<IEnumerable<BloodSugarDTO>> GetUserBloodSugarByDateInterval(string userId, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var sugar = await _repository.GetUserBloodSugarByDateInterval(userId, startDate, endDate);
+                var sugarDTO = _sugarMapper
+                    .Map<IEnumerable<BloodSugar>, IEnumerable<BloodSugarDTO>>(sugar);
+                sugarDTO.ToList().ForEach(x => DetermineBloodSugarState(x));
+                return sugarDTO;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

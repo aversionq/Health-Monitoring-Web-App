@@ -44,10 +44,53 @@ namespace HealthMonitoringApp.Data.Implementations
             return pressure;
         }
 
+        public async Task<IEnumerable<Pressure>> GetSortedPagedUserPressure(string userId, int page, string sortType)
+        {
+            int pageSize = 5;
+            var pressure = _dbContext.Pressures.Where(p => p.UserId == userId);
+            switch (sortType)
+            {
+                case "DateDesc":
+                    pressure = pressure.OrderByDescending(x => x.Date);
+                    break;
+                case "DateAsc":
+                    pressure = pressure.OrderBy(x => x.Date);
+                    break;
+                case "SystolicDesc":
+                    pressure = pressure.OrderByDescending(x => x.Systolic);
+                    break;
+                case "SystolicAsc":
+                    pressure = pressure.OrderBy(x => x.Systolic);
+                    break;
+                case "DiastolicDesc":
+                    pressure = pressure.OrderByDescending(x => x.Diastolic);
+                    break;
+                case "DiastolicAsc":
+                    pressure = pressure.OrderBy(x => x.Diastolic);
+                    break;
+                default:
+                    pressure = pressure.OrderBy(x => x.Date);
+                    break;
+            }
+            pressure = pressure.Skip((page - 1) * pageSize).Take(pageSize);
+
+            return await pressure.ToListAsync();
+        }
+
         public async Task<IEnumerable<Pressure>> GetUserPressure(string userId)
         {
-            var userPressure = await _dbContext.Pressures.Where(x => x.UserId == userId).ToListAsync();
-            return userPressure;
+            var userPressure = _dbContext.Pressures
+                .Where(x => x.UserId == userId)
+                .OrderBy(x => x.Date);
+            return await userPressure.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Pressure>> GetUserPressureByDateInterval(string userId, DateTime startDate, DateTime endDate)
+        {
+            var pressure = _dbContext.Pressures
+                .Where(p => p.UserId == userId && p.Date >= startDate && p.Date <= endDate)
+                .OrderBy(p => p.Date);
+            return await pressure.ToListAsync();
         }
 
         public async Task UpdatePressure(Pressure updPressure)

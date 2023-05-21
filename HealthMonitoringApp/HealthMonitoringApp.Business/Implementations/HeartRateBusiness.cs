@@ -73,6 +73,22 @@ namespace HealthMonitoringApp.Business.Implementations
             }
         }
 
+        public async Task<IEnumerable<HeartRateDTO>> GetSortedPagedUserHeartRate(string userId, int page, string sortType)
+        {
+            try
+            {
+                var pulse = await _repository.GetSortedPagedUserHeartRate(userId, page, sortType);
+                var pulseDTO = _pulseMapper
+                    .Map<IEnumerable<HeartRate>, IEnumerable<HeartRateDTO>>(pulse);
+                pulseDTO.ToList().ForEach(x => DetermineHeartRateState(x));
+                return pulseDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<HeartRateDTO>> GetUserHeartRate(string userId)
         {
             try
@@ -86,6 +102,22 @@ namespace HealthMonitoringApp.Business.Implementations
             catch (Exception)
             {
                 throw new Exception("Heart rate with such id not found");
+            }
+        }
+
+        public async Task<IEnumerable<HeartRateDTO>> GetUserHeartRateByDateInterval(string userId, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var pulse = await _repository.GetUserHeartRateByDateInterval(userId, startDate, endDate);
+                var pulseDTO = _pulseMapper
+                    .Map<IEnumerable<HeartRate>, IEnumerable<HeartRateDTO>>(pulse);
+                pulseDTO.ToList().ForEach(x => DetermineHeartRateState(x));
+                return pulseDTO;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

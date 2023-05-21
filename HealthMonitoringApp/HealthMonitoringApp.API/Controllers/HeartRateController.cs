@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text;
+using HealthMonitoringApp.Business.Enums;
+using System.Security.Claims;
 
 namespace HealthMonitoringApp.API.Controllers
 {
@@ -100,6 +102,55 @@ namespace HealthMonitoringApp.API.Controllers
                 {
                     ErrorDescription = "User heart rate not found",
                     ErrorCode = 800
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("getSortedPagedUserHeartRate")]
+        public async Task<ActionResult<List<HeartRateDTO>>> GetSortedPagedUserHeartRate(int page, string sortType)
+        {
+            try
+            {
+                var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var enumValue = Enum.Parse<SortTypes.HeartRateSort>(sortType);
+                var heartRate = await _heartRateBusiness.GetSortedPagedUserHeartRate(userId, page, sortType);
+                return Ok(heartRate);
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Wrong enum type for sort",
+                    ErrorCode = 50000
+                });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Unable to get sorted and paged heart rate",
+                    ErrorCode = 16000
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("getUserHeartRateByDateInterval")]
+        public async Task<ActionResult<List<HeartRateDTO>>> GetUserHeartRateByDateInterval(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var pulse = await _heartRateBusiness.GetUserHeartRateByDateInterval(userId, startDate, endDate);
+                return Ok(pulse);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Unable to get heart rate in this interval",
+                    ErrorCode = 26000
                 });
             }
         }
