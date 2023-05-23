@@ -74,6 +74,22 @@ namespace HealthMonitoringApp.Business.Implementations
             }
         }
 
+        public async Task<IEnumerable<PressureDTO>> GetSortedPagedUserPressure(string userId, int page, string sortType)
+        {
+            try
+            {
+                var pressure = await _repository.GetSortedPagedUserPressure(userId, page, sortType);
+                var pressureDTO = _pressureMapper
+                    .Map<IEnumerable<Pressure>, IEnumerable<PressureDTO>>(pressure);
+                pressureDTO.ToList().ForEach(x => DeterminePressureState(x));
+                return pressureDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<PressureDTO>> GetUserPressure(string userId)
         {
             try
@@ -87,6 +103,22 @@ namespace HealthMonitoringApp.Business.Implementations
             catch (Exception)
             {
                 throw new Exception("Pressure with such id not found");
+            }
+        }
+
+        public async Task<IEnumerable<PressureDTO>> GetUserPressureByDateInterval(string userId, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var pressure = await _repository.GetUserPressureByDateInterval(userId, startDate, endDate);
+                var pressureDTO = _pressureMapper
+                    .Map<IEnumerable<Pressure>, IEnumerable<PressureDTO>>(pressure);
+                pressureDTO.ToList().ForEach(x => DeterminePressureState(x));
+                return pressureDTO;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

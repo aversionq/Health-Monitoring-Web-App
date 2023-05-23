@@ -1,6 +1,8 @@
 ﻿using HealthMonitoringApp.API.RequestModels;
 using HealthMonitoringApp.API.ResponseModels;
 using HealthMonitoringApp.Business.DTOs;
+using HealthMonitoringApp.Business.Enums;
+using HealthMonitoringApp.Business.Implementations;
 using HealthMonitoringApp.Business.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -104,6 +106,55 @@ namespace HealthMonitoringApp.API.Controllers
                 {
                     ErrorDescription = "User blood sugar not found",
                     ErrorCode = 900
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("getSortedPagedUserBloodSugar")]
+        public async Task<ActionResult<List<BloodSugarDTO>>> GetSortedPagedUserBloodSugar(int page, string sortType)
+        {
+            try
+            {
+                var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var enumValue = Enum.Parse<SortTypes.BloodSugarSort>(sortType);
+                var sugar = await _bloodSugarBusiness.GetSortedPagedUserBloodSugar(userId, page, sortType);
+                return Ok(sugar);
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Wrong enum type for sort",
+                    ErrorCode = 50000
+                });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Unable to get sorted and paged blood sugar",
+                    ErrorCode = 17000
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("getUserBloodSugarByDateInterval")]
+        public async Task<ActionResult<List<BloodSugarDTO>>> GetUserBloodSugarByDateInterval(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var sugar = await _bloodSugarBusiness.GetUserBloodSugarByDateInterval(userId, startDate, endDate);
+                return Ok(sugar);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Unable to get blood sugar in this interval",
+                    ErrorCode = 27000
                 });
             }
         }
