@@ -58,6 +58,70 @@ namespace AuthServer.Controllers
             return doctorsDTO;
         }
 
+        [Authorize(Roles = UserRoles.Doctor)]
+        [HttpGet]
+        [Route("getDoctorPatients")]
+        public async Task<ActionResult<List<PatientDTO>>> GetDoctorPatients()
+        {
+            var userId = await GetCurrentUserId();
+            var patients = await _dbContext.DoctorPatients
+                .Where(x => x.DoctorId == userId)
+                .Select(x => x.User)
+                .ToListAsync();
+
+            List<PatientDTO> patientsDTO = new List<PatientDTO>();
+            foreach (var patient in patients)
+            {
+                patientsDTO.Add(new PatientDTO
+                {
+                    PatientId = patient.Id,
+                    PatientFirstName = patient.FirstName,
+                    PatientLastName = patient.LastName,
+                    Username = patient.UserName
+                });
+            }
+            //foreach (var patientId in patientIds)
+            //{
+            //    var newPatient = await _dbContext.AspNetUsers.Where(x => x.Id == patientId).FirstOrDefaultAsync();
+            //}
+            return Ok(patientsDTO);
+        }
+
+        [Authorize(Roles = UserRoles.Doctor)]
+        [HttpGet]
+        [Route("getPatientBioData")]
+        public async Task<ActionResult<PatientBioData>> GetPatientBioData(string patientId)
+        {
+            var doctorId = await GetCurrentUserId();
+            var doctorCheck = await _dbContext.DoctorPatients
+                    .Where(x => x.DoctorId == doctorId && x.UserId == patientId)
+                    .FirstOrDefaultAsync();
+            if (doctorCheck is not null)
+            {
+                var patient = await _dbContext.AspNetUsers
+                    .Where(x => x.Id == patientId)
+                    .FirstOrDefaultAsync();
+                var bioData = new PatientBioData
+                {
+                    UserHeight = patient.Height,
+                    UserWeight = patient.Weight,
+                    Age = patient.DateOfBirth is null ? null :
+                        (int)((DateTime.Now - patient.DateOfBirth.Value).TotalDays / 365.25),
+                    Gender = patient.Gender is null ? null : ((GenderType.GenderTypes)patient.Gender).ToString()
+                };
+
+                return Ok(bioData);
+            }
+            else
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "You dont have permission to get this user bio data (it is not your patient)",
+                    ErrorCode = 77000
+                });
+            }
+        }
+
         [HttpPost]
         [Route("requestDoctorRole")]
         public async Task<ActionResult> RequestDoctorRole([FromForm] DoctorRoleRequest doctorRoleRequest)
@@ -150,6 +214,7 @@ namespace AuthServer.Controllers
             }
         }
 
+        [Authorize(Roles = UserRoles.Doctor)]
         [HttpPost]
         [Route("checkDoctorRequest")]
         public async Task<ActionResult<bool>> CheckDoctorRequest([FromBody] DoctorCheckRequest dcr)

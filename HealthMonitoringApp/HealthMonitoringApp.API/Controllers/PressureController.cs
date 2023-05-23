@@ -10,6 +10,7 @@ using HealthMonitoringApp.Business.Implementations;
 using HealthMonitoringApp.API.RequestModels;
 using System.Text.Json;
 using System.Text;
+using HealthMonitoringApp.Business.Enums;
 
 namespace HealthMonitoringApp.API.Controllers
 {
@@ -103,6 +104,55 @@ namespace HealthMonitoringApp.API.Controllers
                 {
                     ErrorDescription = "User pressure not found",
                     ErrorCode = 700
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("getSortedPagedUserPressure")]
+        public async Task<ActionResult<List<PressureDTO>>> GetSortedPagedUserPressure(int page, string sortType)
+        {
+            try
+            {
+                var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var enumValue = Enum.Parse<SortTypes.PressureSort>(sortType);
+                var pressure = await _pressureBusiness.GetSortedPagedUserPressure(userId, page, sortType);
+                return Ok(pressure);
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Wrong enum type for sort",
+                    ErrorCode = 50000
+                });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Unable to get sorted and paged pressure",
+                    ErrorCode = 15000
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("getUserPressureByDateInterval")]
+        public async Task<ActionResult<List<PressureDTO>>> GetUserPressureByDateInterval(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var pressure = await _pressureBusiness.GetUserPressureByDateInterval(userId, startDate, endDate);
+                return Ok(pressure);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Unable to get pressure in this interval",
+                    ErrorCode = 25000
                 });
             }
         }

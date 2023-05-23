@@ -156,7 +156,10 @@ namespace AuthServer.Controllers
                 _dbContext.AspNetUsers.Attach(user);
                 _dbContext.Entry(user).Property(x => x.Weight).IsModified = true;
                 await _dbContext.SaveChangesAsync();
-                return Ok();
+                return Ok(new
+                {
+                    updValue = metrics.Value
+                });
             }
             catch (Exception)
             {
@@ -183,7 +186,10 @@ namespace AuthServer.Controllers
                 _dbContext.AspNetUsers.Attach(user);
                 _dbContext.Entry(user).Property(x => x.Height).IsModified = true;
                 await _dbContext.SaveChangesAsync();
-                return Ok();
+                return Ok(new
+                {
+                    updValue = metrics.Value
+                });
             }
             catch (Exception)
             {
@@ -197,9 +203,9 @@ namespace AuthServer.Controllers
 
         [HttpPatch]
         [Route("changeUsername")]
-        public async Task<ActionResult> EditUsername(string newUsername)
+        public async Task<ActionResult> EditUsername([FromBody] StringDataChange sdc)
         {
-            if (await _userManager.FindByNameAsync(newUsername) != null)
+            if (await _userManager.FindByNameAsync(sdc.Value) != null)
             {
                 return BadRequest(new ErrorResponse
                 {
@@ -211,8 +217,8 @@ namespace AuthServer.Controllers
             var user = new AspNetUser
             {
                 Id = await GetCurrentUserId(),
-                UserName = newUsername,
-                NormalizedUserName= newUsername.ToUpper()
+                UserName = sdc.Value,
+                NormalizedUserName= sdc.Value.ToUpper()
             };
             _dbContext.AspNetUsers.Attach(user);
             _dbContext.Entry(user)
@@ -221,7 +227,106 @@ namespace AuthServer.Controllers
                 .Property(x => x.NormalizedUserName).IsModified = true;
             await _dbContext.SaveChangesAsync();
 
-            return Ok();
+            return Ok(new
+            {
+                updValue = sdc.Value
+            });
+        }
+
+        [HttpPatch]
+        [Route("changeFirstName")]
+        public async Task<ActionResult> ChangeUserFirstName([FromBody] StringDataChange sdc)
+        {
+            try
+            {
+                var user = new AspNetUser
+                {
+                    Id = await GetCurrentUserId(),
+                    FirstName = sdc.Value,
+                };
+                _dbContext.AspNetUsers.Attach(user);
+                _dbContext.Entry(user)
+                    .Property(x => x.FirstName)
+                    .IsModified = true;
+                await _dbContext.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    updValue = sdc.Value
+                });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to change user first name",
+                    ErrorCode = 680
+                });
+            }
+        }
+
+        [HttpPatch]
+        [Route("changeLastName")]
+        public async Task<ActionResult> ChangeUserLastName([FromBody] StringDataChange sdc)
+        {
+            try
+            {
+                var user = new AspNetUser
+                {
+                    Id = await GetCurrentUserId(),
+                    LastName = sdc.Value,
+                };
+                _dbContext.AspNetUsers.Attach(user);
+                _dbContext.Entry(user)
+                    .Property(x => x.LastName)
+                    .IsModified = true;
+                await _dbContext.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    updValue = sdc.Value
+                });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to change user last name",
+                    ErrorCode = 690
+                });
+            }
+        }
+
+        [HttpPatch]
+        [Route("changeUserBirthday")]
+        public async Task<ActionResult> ChangeUserBirthday([FromBody] DatetimeDataChange ddc)
+        {
+            try
+            {
+                var user = new AspNetUser
+                {
+                    Id = await GetCurrentUserId(),
+                    DateOfBirth = ddc.Value,
+                };
+                _dbContext.AspNetUsers.Attach(user);
+                _dbContext.Entry(user)
+                    .Property(x => x.DateOfBirth)
+                    .IsModified = true;
+                await _dbContext.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    updValue = ddc.Value
+                });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to change user birthday",
+                    ErrorCode = 6900
+                });
+            }
         }
 
         private void SetupMapper()

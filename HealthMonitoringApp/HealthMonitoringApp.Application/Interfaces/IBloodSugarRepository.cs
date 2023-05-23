@@ -11,6 +11,8 @@ namespace HealthMonitoringApp.Application.Interfaces
     {
         public Task<BloodSugar> GetBloodSugarById(Guid bloodSugarId);
         public Task<IEnumerable<BloodSugar>> GetUserBloodSugar(string userId);
+        public Task<IEnumerable<BloodSugar>> GetSortedPagedUserBloodSugar(string userId, int page, string sortType);
+        public Task<IEnumerable<BloodSugar>> GetUserBloodSugarByDateInterval(string userId, DateTime startDate, DateTime endDate);
         public Task<BloodSugar> GetLatestBloodSugar(string userId);
         public Task AddBloodSugar(BloodSugar bloodSugar);
         public Task UpdateBloodSugar(BloodSugar updBloodSugar);
