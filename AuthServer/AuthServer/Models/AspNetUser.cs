@@ -10,8 +10,12 @@ namespace AuthServer.Models
             AspNetUserClaims = new HashSet<AspNetUserClaim>();
             AspNetUserLogins = new HashSet<AspNetUserLogin>();
             AspNetUserTokens = new HashSet<AspNetUserToken>();
+            ChatMessageFromUserNavigations = new HashSet<ChatMessage>();
+            ChatMessageToUserNavigations = new HashSet<ChatMessage>();
+            Chats = new HashSet<Chat>();
             DoctorPatientDoctors = new HashSet<DoctorPatient>();
             DoctorPatientUsers = new HashSet<DoctorPatient>();
+            UserChats = new HashSet<UserChat>();
             Roles = new HashSet<AspNetRole>();
         }
 
@@ -43,8 +47,12 @@ namespace AuthServer.Models
         public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; }
         public virtual ICollection<AspNetUserLogin> AspNetUserLogins { get; set; }
         public virtual ICollection<AspNetUserToken> AspNetUserTokens { get; set; }
+        public virtual ICollection<ChatMessage> ChatMessageFromUserNavigations { get; set; }
+        public virtual ICollection<ChatMessage> ChatMessageToUserNavigations { get; set; }
+        public virtual ICollection<Chat> Chats { get; set; }
         public virtual ICollection<DoctorPatient> DoctorPatientDoctors { get; set; }
         public virtual ICollection<DoctorPatient> DoctorPatientUsers { get; set; }
+        public virtual ICollection<UserChat> UserChats { get; set; }
 
         public virtual ICollection<AspNetRole> Roles { get; set; }
     }
