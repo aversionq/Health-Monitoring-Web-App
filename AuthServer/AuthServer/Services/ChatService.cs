@@ -5,6 +5,7 @@ using AuthServer.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AuthServer.Services
 {
@@ -68,6 +69,21 @@ namespace AuthServer.Services
             };
             _dbContext.ChatMessages.Add(chatMessageEntity);
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<Guid> GetChatIdByUsers(string userId, string doctorId)
+        {
+            var userChats = await _dbContext.UserChats
+                .Where(x => x.UserId == userId)
+                .Select(x => x.ChatId)
+                .ToListAsync();
+            var doctorChats = await _dbContext.UserChats
+                .Where(x => x.UserId == doctorId)
+                .Select(x => x.ChatId)
+                .ToListAsync();
+
+            var chatId = userChats.Intersect(doctorChats).FirstOrDefault();
+            return chatId;
         }
 
         public async Task<IEnumerable<ChatMessageDTO>> GetUserChatMessages(Guid chatId)
