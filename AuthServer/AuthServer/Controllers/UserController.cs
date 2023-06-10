@@ -329,6 +329,48 @@ namespace AuthServer.Controllers
             }
         }
 
+        [HttpPatch]
+        [Route("changeUserGender")]
+        public async Task<ActionResult> ChangeUserGender([FromBody] StringDataChange sdc)
+        {
+            try
+            {
+                GenderType.GenderTypes parsedGender;
+                bool result = Enum.TryParse(sdc.Value, out parsedGender);
+                if (result)
+                {
+                    var user = new AspNetUser
+                    {
+                        Id = await GetCurrentUserId(),
+                        Gender = (int)parsedGender,
+                    };
+                    _dbContext.AspNetUsers.Attach(user);
+                    _dbContext.Entry(user)
+                        .Property(x => x.Gender)
+                        .IsModified = true;
+                    await _dbContext.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        updValue = sdc.Value
+                    });
+                }
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Wrong gender enum type",
+                    ErrorCode = 95000
+                });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Not able to change user gender",
+                    ErrorCode = 6900
+                });
+            }
+        }
+
         private void SetupMapper()
         {
             var userMapperConfig = new MapperConfiguration(cfg =>

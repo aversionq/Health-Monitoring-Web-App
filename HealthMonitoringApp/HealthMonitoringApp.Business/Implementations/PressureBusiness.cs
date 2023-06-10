@@ -131,7 +131,7 @@ namespace HealthMonitoringApp.Business.Implementations
         private void DeterminePressureState(PressureDTO pressure)
         {
             pressure.MedicalState = MedicalStateHandler
-                .GetUserPressureState(pressure.Systolic, pressure.Diastolic)
+                .GetUserPressureState(pressure.Systolic)
                 .ToString();
         }
 

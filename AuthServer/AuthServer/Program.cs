@@ -1,4 +1,6 @@
 using AuthServer.DatabaseContext;
+using AuthServer.Hubs;
+using AuthServer.Interfaces;
 using AuthServer.Models;
 using AuthServer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,6 +30,8 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 builder.Services.AddDbContext<UsersDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQLConnection")));
 
+builder.Services.AddSignalR();
+
 // Password settings
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -39,6 +43,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<UsersDbContext>();
 builder.Services.AddSingleton<PictureUploadService>();
 
@@ -101,9 +106,10 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 // CORS Policy settings
 builder.Services.AddCors(options => options.AddPolicy("AuthServerPolicy", b =>
 {
-    b.AllowAnyOrigin()
+    b.WithOrigins(@"http://localhost:3000")
      .AllowAnyMethod()
-     .AllowAnyHeader();
+     .AllowAnyHeader()
+     .AllowCredentials();
 }));
 
 var app = builder.Build();
@@ -136,5 +142,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chat");
 
 app.Run();
