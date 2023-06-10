@@ -23,8 +23,11 @@ namespace AuthServer.DatabaseContext
         public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; } = null!;
         public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; } = null!;
         public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; } = null!;
+        public virtual DbSet<Chat> Chats { get; set; } = null!;
+        public virtual DbSet<ChatMessage> ChatMessages { get; set; } = null!;
         public virtual DbSet<DoctorPatient> DoctorPatients { get; set; } = null!;
         public virtual DbSet<DoctorRequest> DoctorRequests { get; set; } = null!;
+        public virtual DbSet<UserChat> UserChats { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -130,6 +133,52 @@ namespace AuthServer.DatabaseContext
                     .HasForeignKey(d => d.UserId);
             });
 
+            modelBuilder.Entity<Chat>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.FromUser).HasMaxLength(450);
+
+                entity.Property(e => e.LastMessageDate).HasPrecision(0);
+
+                entity.Property(e => e.LastMessageText).HasMaxLength(400);
+
+                entity.HasOne(d => d.FromUserNavigation)
+                    .WithMany(p => p.Chats)
+                    .HasForeignKey(d => d.FromUser)
+                    .HasConstraintName("FK_FromUserChat");
+            });
+
+            modelBuilder.Entity<ChatMessage>(entity =>
+            {
+                entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.FromUser).HasMaxLength(450);
+
+                entity.Property(e => e.MessageText).HasMaxLength(500);
+
+                entity.Property(e => e.SentAt).HasPrecision(0);
+
+                entity.Property(e => e.ToUser).HasMaxLength(450);
+
+                entity.HasOne(d => d.Chat)
+                    .WithMany(p => p.ChatMessages)
+                    .HasForeignKey(d => d.ChatId)
+                    .HasConstraintName("FK_MessageChat");
+
+                entity.HasOne(d => d.FromUserNavigation)
+                    .WithMany(p => p.ChatMessageFromUserNavigations)
+                    .HasForeignKey(d => d.FromUser)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_FromUserMessage");
+
+                entity.HasOne(d => d.ToUserNavigation)
+                    .WithMany(p => p.ChatMessageToUserNavigations)
+                    .HasForeignKey(d => d.ToUser)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ToUserMessage");
+            });
+
             modelBuilder.Entity<DoctorPatient>(entity =>
             {
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -165,6 +214,25 @@ namespace AuthServer.DatabaseContext
                     .HasForeignKey<DoctorRequest>(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserDoctor");
+            });
+
+            modelBuilder.Entity<UserChat>(entity =>
+            {
+                entity.HasIndex(e => new { e.ChatId, e.UserId }, "UserChats_UN")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.HasOne(d => d.Chat)
+                    .WithMany(p => p.UserChats)
+                    .HasForeignKey(d => d.ChatId)
+                    .HasConstraintName("FK_Chat");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.UserChats)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_User");
             });
 
             OnModelCreatingPartial(modelBuilder);
