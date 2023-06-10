@@ -75,7 +75,7 @@ namespace HealthMonitoringApp.Data.Implementations
         {
             var userHeartRate = _dbContext.HeartRates
                 .Where(h => h.UserId == userId)
-                .OrderBy(h => h.Date);
+                .OrderByDescending(h => h.Date);
             return await userHeartRate.ToListAsync();
         }
 

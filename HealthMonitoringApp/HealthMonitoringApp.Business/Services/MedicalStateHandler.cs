@@ -43,17 +43,17 @@ namespace HealthMonitoringApp.Business.Services
             }
         }
 
-        public static MedicalState.MedicalStateType GetUserPressureState(int userSystolic, int userDiastolic)
+        public static MedicalState.MedicalStateType GetUserPressureState(int userSystolic)
         {
-            switch (userSystolic, userDiastolic)
+            switch (userSystolic)
             {
-                case ( < 90, < 60):
+                case ( < 90):
                     return MedicalState.MedicalStateType.Low;
-                case ( >= 90 and < 125, >= 60 and < 80):
+                case ( >= 90 and < 127):
                     return MedicalState.MedicalStateType.Normal;
-                case ( >= 125 and < 135, >= 70 and <90):
+                case ( >= 127 and < 140):
                     return MedicalState.MedicalStateType.Elevated;
-                case ( >= 135, >= 80):
+                case (>= 140):
                     return MedicalState.MedicalStateType.High;
                 default:
                     return MedicalState.MedicalStateType.None;
