@@ -76,7 +76,7 @@ namespace HealthMonitoringApp.Data.Implementations
         {
             var userBloodSugar = _dbContext.BloodSugars
                 .Where(b => b.UserId == userId)
-                .OrderBy(b => b.Date);
+                .OrderByDescending(b => b.Date);
             return await userBloodSugar.ToListAsync();
         }
 

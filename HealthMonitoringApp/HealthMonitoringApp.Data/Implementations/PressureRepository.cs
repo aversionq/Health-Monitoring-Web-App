@@ -81,7 +81,7 @@ namespace HealthMonitoringApp.Data.Implementations
         {
             var userPressure = _dbContext.Pressures
                 .Where(x => x.UserId == userId)
-                .OrderBy(x => x.Date);
+                .OrderByDescending(x => x.Date);
             return await userPressure.ToListAsync();
         }
 
