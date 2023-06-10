@@ -95,6 +95,10 @@ namespace AuthServer.Services
                     .Where(x => x.ChatId == chatId && x.UserId != userId)
                     .Select(x => x.UserId)
                     .FirstOrDefaultAsync();
+                var otherUserUsername = await _dbContext.AspNetUsers
+                    .Where(x => x.Id == otherUserId)
+                    .Select(x => x.UserName)
+                    .FirstOrDefaultAsync();
                 var chatInfo = await _dbContext.Chats
                     .Where(x => x.Id == chatId)
                     .FirstOrDefaultAsync();
@@ -109,7 +113,8 @@ namespace AuthServer.Services
                     LastMessageDate = chatInfo.LastMessageDate,
                     FromUsername = fromUsername,
                     OtherUserPicture = null,
-                    OtherUserId = otherUserId
+                    OtherUserId = otherUserId,
+                    OtherUserUsername = otherUserUsername
                 };
                 userChatsDTO.Add(chatDTO);
             }
