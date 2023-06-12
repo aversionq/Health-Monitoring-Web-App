@@ -36,7 +36,7 @@ namespace AuthServer.Controllers
 
         [HttpGet]
         [Route("getAllDoctors")]
-        public async Task<ActionResult<List<ApplicationUserDTO>>> GetAllDoctors()
+        public async Task<ActionResult<List<DoctorDTO>>> GetAllDoctors()
         {
             var roleId = await _dbContext.AspNetRoles
                 .Where(x => x.Name == UserRoles.Doctor)
@@ -49,7 +49,7 @@ namespace AuthServer.Controllers
                 .Include(r => r.Roles)
                 .ToListAsync();
 
-            List<ApplicationUserDTO> doctorsDTO = new List<ApplicationUserDTO>();
+            List<DoctorDTO> doctorsDTO = new List<DoctorDTO>();
             foreach (var doctorEntity in doctors)
             {
                 doctorsDTO.Add(await MapUserDoctorDTO(doctorEntity));
@@ -242,7 +242,26 @@ namespace AuthServer.Controllers
             return currentUser.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
 
-        private async Task<ApplicationUserDTO> MapUserDoctorDTO(AspNetUser user)
+        private async Task<bool> IsDoctorContactedWithCurrentUser(string doctorId)
+        {
+            var userId = await GetCurrentUserId();
+
+            var doctorChats = await _dbContext.UserChats
+                .Where(x => x.UserId == doctorId)
+                .Select(x => x.ChatId)
+                .ToListAsync();
+            var userChats = await _dbContext.UserChats
+                .Where(x => x.UserId == userId)
+                .Select(x => x.ChatId)
+                .ToListAsync();
+
+            var userChatsHashSet = userChats.ToHashSet();
+            userChatsHashSet.IntersectWith(doctorChats);
+
+            return userChatsHashSet.Count > 0;
+        }
+
+        private async Task<DoctorDTO> MapUserDoctorDTO(AspNetUser user)
         {
             var appUser = await _userManager.FindByIdAsync(user.Id);
             var roles = await _userManager.GetRolesAsync(appUser);
@@ -259,20 +278,17 @@ namespace AuthServer.Controllers
             {
                 userRole = UserRoles.DefaultUser;
             }
-            ApplicationUserDTO userDTO = new ApplicationUserDTO
+            DoctorDTO userDTO = new DoctorDTO
             {
                 Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Role = userRole,
                 DateOfBirth = user.DateOfBirth,
-                RegistrationDate = user.RegistrationDate,
-                Email = user.Email,
                 Username = user.UserName,
                 Age = user.DateOfBirth is null ? null : (int)((DateTime.Now - user.DateOfBirth.Value).TotalDays / 365.25),
-                Weight = user.Weight,
-                Height = user.Height,
-                Gender = user.Gender is null ? null : ((GenderType.GenderTypes)user.Gender).ToString()
+                Gender = user.Gender is null ? null : ((GenderType.GenderTypes)user.Gender).ToString(),
+                IsContactedWithCurrentUser = await IsDoctorContactedWithCurrentUser(user.Id)
             };
 
             return userDTO;

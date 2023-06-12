@@ -8,5 +8,6 @@ namespace AuthServer.Interfaces
         public Task<IEnumerable<ChatMessageDTO>> GetUserChatMessages(Guid chatId);
         public Task AddChat(ChatToAddDTO chatToAddDTO);
         public Task AddMessage(ChatMessageToAddDTO chatMessageDTO);
+        public Task<Guid> GetChatIdByUsers(string userId, string doctorId);
     }
 }

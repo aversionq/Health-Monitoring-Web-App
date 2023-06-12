@@ -5,6 +5,7 @@ using AuthServer.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AuthServer.Services
 {
@@ -70,6 +71,21 @@ namespace AuthServer.Services
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<Guid> GetChatIdByUsers(string userId, string doctorId)
+        {
+            var userChats = await _dbContext.UserChats
+                .Where(x => x.UserId == userId)
+                .Select(x => x.ChatId)
+                .ToListAsync();
+            var doctorChats = await _dbContext.UserChats
+                .Where(x => x.UserId == doctorId)
+                .Select(x => x.ChatId)
+                .ToListAsync();
+
+            var chatId = userChats.Intersect(doctorChats).FirstOrDefault();
+            return chatId;
+        }
+
         public async Task<IEnumerable<ChatMessageDTO>> GetUserChatMessages(Guid chatId)
         {
             var messages = await _dbContext.ChatMessages
@@ -95,6 +111,10 @@ namespace AuthServer.Services
                     .Where(x => x.ChatId == chatId && x.UserId != userId)
                     .Select(x => x.UserId)
                     .FirstOrDefaultAsync();
+                var otherUserUsername = await _dbContext.AspNetUsers
+                    .Where(x => x.Id == otherUserId)
+                    .Select(x => x.UserName)
+                    .FirstOrDefaultAsync();
                 var chatInfo = await _dbContext.Chats
                     .Where(x => x.Id == chatId)
                     .FirstOrDefaultAsync();
@@ -109,7 +129,8 @@ namespace AuthServer.Services
                     LastMessageDate = chatInfo.LastMessageDate,
                     FromUsername = fromUsername,
                     OtherUserPicture = null,
-                    OtherUserId = otherUserId
+                    OtherUserId = otherUserId,
+                    OtherUserUsername = otherUserUsername
                 };
                 userChatsDTO.Add(chatDTO);
             }
