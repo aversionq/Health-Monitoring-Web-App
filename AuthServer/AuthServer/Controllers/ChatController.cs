@@ -1,6 +1,7 @@
 ﻿using AuthServer.DTOs;
 using AuthServer.Interfaces;
 using AuthServer.Models;
+using AuthServer.ResponseModels;
 using AuthServer.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -32,6 +33,29 @@ namespace AuthServer.Controllers
             var userId = GetCurrentUserId();
             var chats = await _chatService.GetUserChats(userId);
             return Ok(chats);
+        }
+
+        [HttpGet]
+        [Route("getChatByUserIds")]
+        public async Task<ActionResult<Guid>> GetChatByUserIds(string userId, string doctorId)
+        {
+            try
+            {
+                var chatId = await _chatService.GetChatIdByUsers(userId, doctorId);
+                if (chatId == default)
+                {
+                    throw new Exception();
+                }
+                return Ok(chatId);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Unable to get chat for these users",
+                    ErrorCode = 152000
+                });
+            }
         }
 
         [HttpGet]

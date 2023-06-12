@@ -11,7 +11,7 @@ namespace AuthServer.Hubs
     [Authorize]
     public class ChatHub : Hub
     {
-        private static readonly Dictionary<string, List<string>> _userConnections = new ();
+        private static readonly Dictionary<string, HashSet<string>> _userConnections = new ();
         private UsersDbContext _dbContext;
 
         public ChatHub(UsersDbContext ctx)
@@ -24,7 +24,7 @@ namespace AuthServer.Hubs
             var userId = GetCurrentUserId();
             if (!_userConnections.ContainsKey(userId))
             {
-                _userConnections.Add(userId, new List<string>());
+                _userConnections.Add(userId, new HashSet<string>());
             }
             _userConnections[userId].Add(Context.ConnectionId);
             await base.OnConnectedAsync();
@@ -59,9 +59,19 @@ namespace AuthServer.Hubs
                 };
                 _dbContext.ChatMessages.Add(chatMessageEntity);
                 await _dbContext.SaveChangesAsync();
-                foreach (var connection in _userConnections[message.ToUser])
+                if (_userConnections.ContainsKey(message.ToUser))
                 {
-                    await Clients.Client(connection).SendAsync("ReceiveMessage", chatMessageEntity);
+                    foreach (var connection in _userConnections[message.ToUser])
+                    {
+                        await Clients.Client(connection).SendAsync("ReceiveMessage", chatMessageEntity);
+                    }
+                }
+                if (_userConnections.ContainsKey(message.FromUser))
+                {
+                    foreach (var callerConnection in _userConnections[message.FromUser])
+                    {
+                        await Clients.Client(callerConnection).SendAsync("ReceiveMessage", chatMessageEntity);
+                    }
                 }
             }
         }

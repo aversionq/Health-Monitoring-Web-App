@@ -30,8 +30,6 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 builder.Services.AddDbContext<UsersDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQLConnection")));
 
-builder.Services.AddSignalR();
-
 // Password settings
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -66,7 +64,24 @@ builder.Services.AddAuthentication(options =>
             ValidIssuer = builder.Configuration["JWT:Issuer"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/chat")))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
+
+builder.Services.AddSignalR();
 
 // Swagger settings
 builder.Services.AddSwaggerGen(options =>
