@@ -17,5 +17,6 @@ namespace AuthServer.DTOs
         public double? Weight { get; set; }
         public double? Height { get; set; }
         public string? Gender { get; set; }
+        public string? ProfilePicture { get; set; }
     }
 }
