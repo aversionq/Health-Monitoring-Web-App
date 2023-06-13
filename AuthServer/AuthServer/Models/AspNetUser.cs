@@ -42,6 +42,7 @@ namespace AuthServer.Models
         public double? Height { get; set; }
         public double? Weight { get; set; }
         public string Ipaddress { get; set; } = null!;
+        public string? ProfilePicture { get; set; }
 
         public virtual DoctorRequest? DoctorRequest { get; set; }
         public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; }

@@ -25,6 +25,7 @@ namespace AuthServer.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private UsersDbContext _dbContext;
         private PictureUploadService _pictureUploadService;
+        private readonly string _doctorDefaultProfilePicture = @"https://cdn-icons-png.flaticon.com/512/3774/3774299.png";
 
         public DoctorController(UserManager<ApplicationUser> userManager,
             UsersDbContext ctx, PictureUploadService picService)
@@ -77,7 +78,8 @@ namespace AuthServer.Controllers
                     PatientId = patient.Id,
                     PatientFirstName = patient.FirstName,
                     PatientLastName = patient.LastName,
-                    Username = patient.UserName
+                    Username = patient.UserName,
+                    ProfilePicture = patient.ProfilePicture
                 });
             }
             //foreach (var patientId in patientIds)
@@ -198,6 +200,15 @@ namespace AuthServer.Controllers
                 {
                     UserId = userId
                 });
+                var doctor = new AspNetUser
+                {
+                    Id = userId,
+                    ProfilePicture = _doctorDefaultProfilePicture
+                };
+                _dbContext.AspNetUsers.Attach(doctor);
+                _dbContext.Entry(doctor)
+                    .Property(x => x.ProfilePicture)
+                    .IsModified = true;
                 await _dbContext.SaveChangesAsync();
                 return Ok(new
                 {
@@ -288,7 +299,8 @@ namespace AuthServer.Controllers
                 Username = user.UserName,
                 Age = user.DateOfBirth is null ? null : (int)((DateTime.Now - user.DateOfBirth.Value).TotalDays / 365.25),
                 Gender = user.Gender is null ? null : ((GenderType.GenderTypes)user.Gender).ToString(),
-                IsContactedWithCurrentUser = await IsDoctorContactedWithCurrentUser(user.Id)
+                IsContactedWithCurrentUser = await IsDoctorContactedWithCurrentUser(user.Id),
+                ProfilePicture = user.ProfilePicture,
             };
 
             return userDTO;

@@ -23,6 +23,9 @@ namespace AuthServer.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
 
+        // It's done this way because ProfilePicture is Nullable, cant wipe DB right now. Refactor soon.
+        private readonly string _defaultProfilePicture = @"https://cdn-icons-png.flaticon.com/512/1430/1430453.png";
+
         public AuthController(RoleManager<IdentityRole> roleManager, 
             IConfiguration configuration, UserManager<ApplicationUser> userManager)
         {
@@ -73,7 +76,8 @@ namespace AuthServer.Controllers
                 //Weight = model.Weight,
                 //Height = model.Height,
                 //Gender = model.Gender,
-                IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
+                IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(),
+                ProfilePicture = _defaultProfilePicture
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

@@ -22,5 +22,6 @@ namespace AuthServer.Models
         //[Required]
         public GenderType.GenderTypes? Gender { get; set; }
         public string IPAddress { get; set; }
+        public string? ProfilePicture { get; set; }
     }
 }

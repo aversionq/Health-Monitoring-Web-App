@@ -4,6 +4,7 @@ using HealthMonitoringApp.Business.DTOs;
 using HealthMonitoringApp.Business.Enums;
 using HealthMonitoringApp.Business.Implementations;
 using HealthMonitoringApp.Business.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
@@ -13,6 +14,7 @@ using System.Text.Json;
 
 namespace HealthMonitoringApp.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class BloodSugarController : ControllerBase
