@@ -111,9 +111,9 @@ namespace AuthServer.Services
                     .Where(x => x.ChatId == chatId && x.UserId != userId)
                     .Select(x => x.UserId)
                     .FirstOrDefaultAsync();
-                var otherUserUsername = await _dbContext.AspNetUsers
+                var otherUserInfo = await _dbContext.AspNetUsers
                     .Where(x => x.Id == otherUserId)
-                    .Select(x => x.UserName)
+                    .Select(x => new { x.UserName, x.ProfilePicture })
                     .FirstOrDefaultAsync();
                 var chatInfo = await _dbContext.Chats
                     .Where(x => x.Id == chatId)
@@ -128,14 +128,14 @@ namespace AuthServer.Services
                     LastMessageText = chatInfo.LastMessageText,
                     LastMessageDate = chatInfo.LastMessageDate,
                     FromUsername = fromUsername,
-                    OtherUserPicture = null,
+                    OtherUserPicture = otherUserInfo.ProfilePicture,
                     OtherUserId = otherUserId,
-                    OtherUserUsername = otherUserUsername
+                    OtherUserUsername = otherUserInfo.UserName
                 };
                 userChatsDTO.Add(chatDTO);
             }
 
-            return userChatsDTO;
+            return userChatsDTO.OrderByDescending(x => x.LastMessageDate);
         }
 
         private void SetupMappers()

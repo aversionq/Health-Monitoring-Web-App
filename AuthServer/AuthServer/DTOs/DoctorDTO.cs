@@ -11,5 +11,6 @@
         public string Username { get; set; }
         public string? Gender { get; set; }
         public bool IsContactedWithCurrentUser { get; set; }
+        public string? ProfilePicture { get; set; }
     }
 }

@@ -92,7 +92,7 @@ namespace AuthServer.Controllers
                 LastName = user.LastName,
                 Role = userRole,
                 Username = user.UserName,
-                ProfilePicture = null
+                ProfilePicture = user.ProfilePicture
             };
 
             return chatPartner;

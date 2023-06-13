@@ -114,7 +114,8 @@ namespace AuthServer.Controllers
                 Age = user.DateOfBirth is null ? null : (int)((DateTime.Now - user.DateOfBirth.Value).TotalDays / 365.25),
                 Weight = user.Weight,
                 Height = user.Height,
-                Gender = user.Gender is null ? null : ((GenderType.GenderTypes)user.Gender).ToString()
+                Gender = user.Gender is null ? null : ((GenderType.GenderTypes)user.Gender).ToString(),
+                ProfilePicture = user.ProfilePicture,
             };
             //var userDTO = _userMapper.Map<ApplicationUser, ApplicationUserDTO>(user);
             return userDTO;
@@ -367,6 +368,40 @@ namespace AuthServer.Controllers
                 {
                     ErrorDescription = "Not able to change user gender",
                     ErrorCode = 6900
+                });
+            }
+        }
+
+        [HttpPatch]
+        [Route("changeUserProfilePicture")]
+        public async Task<ActionResult> ChangeUserProfilePicture([FromForm] PictureUpload pfp)
+        {
+            try
+            {
+                var userId = await GetCurrentUserId();
+                var pfpLink = await _pictureUploadService.UploadImage(pfp);
+                var user = new AspNetUser
+                {
+                    Id = userId,
+                    ProfilePicture = pfpLink
+                };
+                _dbContext.AspNetUsers.Attach(user);
+                _dbContext.Entry(user)
+                    .Property(x => x.ProfilePicture)
+                    .IsModified = true;
+                await _dbContext.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    updValue = pfpLink
+                });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorDescription = "Unable to update user's profile picture",
+                    ErrorCode = 287000
                 });
             }
         }

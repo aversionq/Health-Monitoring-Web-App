@@ -10,9 +10,11 @@ using System.Text.Json;
 using System.Text;
 using HealthMonitoringApp.Business.Enums;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HealthMonitoringApp.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HeartRateController : ControllerBase

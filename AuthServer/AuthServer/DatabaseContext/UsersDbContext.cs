@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using AuthServer.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using AuthServer.Models;
 
 namespace AuthServer.DatabaseContext
 {
@@ -83,6 +83,11 @@ namespace AuthServer.DatabaseContext
                 entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
 
                 entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
+
+                entity.Property(e => e.ProfilePicture)
+                    .HasMaxLength(200)
+                    .HasColumnName("ProfilePicture")
+                    .HasDefaultValueSql("('https://cdn-icons-png.flaticon.com/512/1430/1430453.png')");
 
                 entity.Property(e => e.UserName).HasMaxLength(256);
 
